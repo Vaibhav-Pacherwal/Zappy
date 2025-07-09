@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zappy | Email Verification</title>
+    </head>
+    <style>
+        body {
+            font-size: 1.2rem;
+        }
+    </style>
+    <body>
+        <h1>Email Verification</h1>
+        <form action="/verify-email" method="post">
+            <label for="email">Enter Email: </label>
+            <input type="email" name="email" id="email" required>
+            <button>Send OTP</button>
+        </form>
+    </body>
+</html>

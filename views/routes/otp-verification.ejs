@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zappy | OTP Verification</title>
+    </head>
+    <style>
+        body {
+            font-size: 1.2rem;
+        }
+    </style>
+    <body>
+        <h1>Email Verification</h1>
+        <form action="/verify-otp" method="post">
+            <label for="email">Enter Email: </label>
+            <input type="email" name="email" id="email" value="<%= email %>" required><br>
+            <label for="otp">Enter OTP: </label>
+            <input type="text" name="otp" id="otp" required>
+            <button>Verify OTP</button>
+        </form>
+    </body>
+</html>

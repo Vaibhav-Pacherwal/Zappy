@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .chat-window {
+            width: 80%;
+            height: 80%;
+            margin: 2px;
+            padding: 0.5rem;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            position: absolute;
+            overflow-y: auto;
+            border: 2px solid black;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .chat-window::-webkit-scrollbar {
+            display: none;
+        }
+        .chat-window .msg{
+            width: 100%;
+            bottom: 1.7rem;
+            position: absolute;
+        }
+        .chat-window form input {
+            width: 70%;
+            padding: 1rem;
+            border: 2px solid black;
+            font-size: 1rem;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+         .chat-window .msg form {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+         }
+        .chat-window form button {
+            background-color: black;
+            color: white;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+        }
+        .header {
+            width: 100%;
+            height: 2.5rem;
+            display: flex;
+            padding: 10px 0 10px 0;
+            border-bottom: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header .features {
+            display: flex;
+            gap: 1rem;
+            padding: 0 10px 0 10px;
+        }
+        .header .features img {
+            cursor: pointer;
+        }
+        .header .about-reciever {
+            padding: 0 10px 0 10px;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+        .chattings {
+            width: 100%;
+            height: 75.5%;
+            overflow-y: auto;
+        }
+        .chattings::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+    <body>
+        <div class="chat-window">
+            <div class="header">
+                <div class="about-reciever">
+                    <h1><strong><%= user2.fname %></strong></h1>
+                </div>
+                <div class="features">
+                    <img src="/images/phone.png" alt="voice-call" height="25px" width="25px">
+                    <img src="/images/facetime-button.png" alt="video-call" height="25px" width="25px">
+                </div>
+            </div>
+            <div class="chattings">
+                <ul id="messages">
+                <% sortedChats.forEach((subChat)=>{ %>
+                    <p style="text-align: center;"><%= subChat[0].date %></p>
+                    <% subChat.forEach((chat)=>{ %>
+                        <li>
+                            <%= chat.sender %>: <%= chat.content %>(<%= chat.sendAt %>)
+                        </li>
+                    <% }) %>
+                <% }) %>
+            </ul>
+            </div>
+            <div class="msg">
+                <form action="">
+                    <input type="text" placeholder="Type Your Message Here....." id="currMsg">
+                    <button>SEND</button>
+                </form>
+            </div>
+        </div>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        socket.emit("join room", "<%= user1.fname %>");  // 👈 Join room using current user
+
+        console.log("Socket connected:", socket.connected);
+
+        let form = document.querySelector("form");
+        let input = document.getElementById("currMsg");
+        let messages = document.getElementById("messages");
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            let currentMessage = input.value.trim();
+            let currTime = moment().format("hh:mm A");
+
+            if (currentMessage !== "") {
+                socket.emit("chat message", {
+                    content: currentMessage,
+                    sender: "<%= user1.fname %>",
+                    reciever: "<%= user2.fname %>",
+                    time: currTime
+                });
+                input.value = "";
+            }
+        });
+
+        socket.on("chat message", (msg) => {
+            console.log(msg);
+            let li = document.createElement("li");
+            li.innerText = `${msg.sender}: ${msg.content}(${msg.time})`;
+            messages.appendChild(li);
+            messages.scrollTop = messages.scrollHeight;
+        });
+    </script>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <style>
+        body {
+            font-size: 1.2rem;
+        }
+        .availableMembers {
+            height: 300px;
+            width: 300px;
+            border: 2px solid black;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .availableMembers::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+    <body>
+        <h1>Group Creation</h1>
+        <form action="/group" method="post">
+            <label for="gName">Group Name</label>
+            <input type="text" id="gName" name="gName" required><br>
+            <p>select the members for your group<a href="#" id="addM">+Add Member</a></p>
+            <div class="availableMembers">
+                <% filteredMembers.forEach(member => { %>
+                    <label for="user"><input type="checkbox" name="user" value="<%= member.username %>"><%= member.username %></label><br>
+                <% }) %>
+            </div>
+            <button>Create Group</button>
+        </form>
+    </body>
+    <script>
+        let addMember = document.getElementById("addM");
+        let form = document.querySelector("form");
+        let memberList = document.querySelector(".availableMembers")
+        addMember.addEventListener("click", (e)=>{
+            e.preventDefault();
+            memberList.style.display = "block";
+        })
+    </script>
+</html>

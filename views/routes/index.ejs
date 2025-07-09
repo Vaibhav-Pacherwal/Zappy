@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zappy</title>
+    </head>
+    <style>
+        body {
+            font-size: 1.2rem;
+        }
+    </style>
+    <body>
+        <h1>Zappy</h1>
+        <button id="signup">Create Account</button>
+        <button id="login">Login</button>
+    </body>
+    <script>
+        const signup = document.getElementById("signup");
+        const login = document.getElementById("login");
+        signup.addEventListener("click", ()=>{
+            window.location.href = "/signup-form";
+        });
+        login.addEventListener("click", ()=>{
+            window.location.href = "/login-form";
+        })
+    </script>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zappy | SignUp</title>
+    </head>
+    <style>
+        body {
+            font-size: 1.2rem;
+        }
+    </style>
+    <body>
+        <h1>SignUp</h1>
+        <form action="/signup" method="post">
+            <label for="fname">First Name</label>
+            <input type="text" name="fname" id="fname" placeholder="e.g., John" required>
+            <br>
+            <label for="lname">Last Name</label>
+            <input type="text" name="lname" id="lname" placeholder="e.g., Doe" required>
+            <br>
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" placeholder="@johndoe123" required>
+            <br>
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" placeholder="you@example.com" required>
+            <br>
+            <label for="phone">Phone Number</label>
+            <input type="text" name="phone" id="phone" placeholder="+91XXXXXXXXXX" required>
+            <br>
+            <label for="pass">Password</label>
+            <input type="password" name="password" id="pass" placeholder="Create a strong passowrd" required>
+            <br>
+            <label for="confirmedPass">Confirm Password</label>
+            <input type="password" name="confirmedPass" id="confirmedPass" placeholder="Re-enter your password" required>
+            <br>
+            <button>Create Account</button>
+        </form>
+    </body>
+</html>
