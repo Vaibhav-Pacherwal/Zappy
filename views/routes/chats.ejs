@@ -12,6 +12,15 @@
             font-size: 1.2rem;
             overflow: hidden;
         }
+        .navbar {
+            height: 70px;
+            border-bottom: 1px solid black;
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0 1rem 0 1rem;
+            justify-content: space-between;
+            align-items: center;
+        }
         .sidebar {
             height: 60vh;
             width: 25%;
@@ -23,7 +32,7 @@
             border-radius: 12px;
         }
         .containers {
-            height: 100vh;
+            height: 90vh;
             width: 100vw;
             display: flex;
             justify-content: center;
@@ -85,6 +94,14 @@
         }
     </style>
     <body>
+        <div class="navbar">
+            <div class="user">
+                <h3><%= details.fname %> <%= details.lname %></h3>
+            </div>
+            <div class="requests">
+                <a href="/requests">Join Requests</a>
+            </div>
+        </div>
         <div class="containers">
             <div class="sidebar">
                 <h1>Start Chat With...</h1>

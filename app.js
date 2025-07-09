@@ -335,4 +335,22 @@ app.get("/:grpName/join-request", protect, async (req, res)=>{
     } catch(err) {
         res.send("can't sent request to admin!");
     }
+});
+
+app.get("/requests", protect, async (req, res)=>{
+    const username = req.user.username;
+    try {
+        let requests = await Request.find({admin: username});
+        // if(!requests) {
+        //     return res.send("when someone wants to join any of your groups, his/her request appears here!");
+        // }
+        let uniqueRequests = new Set();
+        requests.forEach(request => {
+            uniqueRequests.add(request);
+        });
+        let finalRequests = Array.from(uniqueRequests);
+        console.log(finalRequests);
+    } catch(err) {
+        console.log("failing to gather info!");
+    }
 })
