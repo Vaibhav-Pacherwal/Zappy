@@ -217,6 +217,8 @@ app.get("/chats", protect, async (req, res) => {
     try {
         let users = await User.find();
         let groups = await Group.find();
+        const username = details.username;
+        let requests = await Request.find({admin: username});
         let otherUsers = users.filter(user => user._id.toString() !== details._id.toString());
         let recents = await Message.find({$and: [{ users: { $in: [details.fname] } },{ sender: details.fname }]}).sort({ sendAt: -1 });
         let uniqueRecievers = new Set();
@@ -231,7 +233,7 @@ app.get("/chats", protect, async (req, res) => {
             })
         );
 
-        res.render("routes/chats.ejs", { details, otherUsers, recieversUsername, groups });
+        res.render("routes/chats.ejs", { details, otherUsers, recieversUsername, groups, requests });
     } catch (err) {
         console.log("Can't find user details!", err);
         res.status(500).send("Server error");
@@ -324,7 +326,7 @@ app.get("/:grpName/join-request", protect, async (req, res)=>{
     const {grpName} = req.params;
     const user = req.user.username;
     try {
-        const grpDetails = await Group.find({groupName: grpName});
+        const grpDetails = await Group.findOne({groupName: grpName});
         let grpAdmin = grpDetails.groupAdmin;
         await Request.create({
             user: user,
@@ -341,16 +343,40 @@ app.get("/requests", protect, async (req, res)=>{
     const username = req.user.username;
     try {
         let requests = await Request.find({admin: username});
-        // if(!requests) {
-        //     return res.send("when someone wants to join any of your groups, his/her request appears here!");
-        // }
-        let uniqueRequests = new Set();
-        requests.forEach(request => {
-            uniqueRequests.add(request);
-        });
-        let finalRequests = Array.from(uniqueRequests);
-        console.log(finalRequests);
+        if(!requests) {
+            return res.send("when someone wants to join any of your groups, his/her request appears here!");
+        }
+        res.render("routes/requestApprovals.ejs", {requests});
     } catch(err) {
         console.log("failing to gather info!");
     }
-})
+});
+
+app.delete("/request/disapprove/:id", protect, async (req, res)=>{
+    const {id} = req.params;
+    try {
+        await Request.findByIdAndDelete(id);
+        res.redirect("/requests"); 
+    } catch(err) {
+        res.send("request not found!");
+    }
+});
+
+app.patch("/request/approve/:id", protect, async (req, res)=>{
+    const {id} = req.params;
+    try {
+        const request = await Request.findOne({_id: id});
+        const username = request.user;
+        const grpName = request.groupName;
+        const group = await Group.findOne({groupName: grpName});
+        const grpId = group._id;
+        await Group.findByIdAndUpdate(grpId, {
+            $addToSet: { members: username }
+        });
+        await Request.findByIdAndDelete(id);
+        res.redirect("/requests"); 
+    } catch(err) {
+        console.log(err);
+    }
+});
+
