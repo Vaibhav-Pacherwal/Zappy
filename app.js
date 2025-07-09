@@ -15,6 +15,7 @@ const { Server } = require("socket.io");
 const moment = require("moment");
 const Message = require("./models/message");
 const Group = require("./models/group");
+const Request = require("./models/join-request")
 const app = express();
 const server = require("http").createServer(app);
 require("dotenv").config();
@@ -302,3 +303,36 @@ app.post("/group", protect, async (req, res)=>{
         console.log("can't create group right now");
     }
 });
+
+app.get("/chats/group/:grpName", protect, async (req, res)=>{
+    const {grpName} = req.params;
+    const currentUser = req.user.username;
+    try {
+        let grpDetails = await Group.findOne({groupName: grpName});
+        let members = grpDetails.members;
+
+        if(members.includes(currentUser)) {
+            return res.render("routes/grpChats.ejs", {grpDetails});
+        }
+        res.render("routes/illegalMember.ejs", {grpDetails});
+    } catch(err) {
+        console.log("there is an error coming up!");
+    }
+});
+
+app.get("/:grpName/join-request", protect, async (req, res)=>{
+    const {grpName} = req.params;
+    const user = req.user.username;
+    try {
+        const grpDetails = await Group.find({groupName: grpName});
+        let grpAdmin = grpDetails.groupAdmin;
+        await Request.create({
+            user: user,
+            admin: grpAdmin,
+            groupName: grpName
+        });
+        res.render("routes/sentRequest.ejs", {grpDetails});
+    } catch(err) {
+        res.send("can't sent request to admin!");
+    }
+})
