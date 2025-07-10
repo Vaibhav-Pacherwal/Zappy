@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Zappy | Change Admin</title>
+        <style>
+            .newAdmin {
+                padding: 1rem;
+                width: 250px;
+                border: 2px solid black;
+                border-radius: 12px;
+                background-color: #f8f8fd;
+                display: flex;
+                flex-direction: column;
+                overflow-y: auto;
+            }
+            .newForm {
+                display: none;
+            }
+            .show {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .newForm button {
+                width: 150px;
+                padding: 0.5rem;
+                background-color: black;
+                color: white;
+                font-size: 1rem;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+            }
+            .newAdmin::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <p>
+            You are an admin of this group <br>
+            <a href="#" id="selectAdmin">click here</a> to choose somebody else as an admin.
+        </p>
+        <form action="/change-admin/<%= grpDetails._id %>" method="post" class="newForm">
+            <div class="newAdmin">
+                <% otherMembers.forEach(member => { %>
+                    <label for="user"><input type="radio" name="user" value="<%= member %>"><%= member %></label><br>
+                <% }) %>
+            </div>
+            <button>Change & Leave</button>
+        </form>
+    </body>
+    <script>
+        const options = document.getElementById("selectAdmin");
+        const members = document.querySelector(".newForm");
+        options.addEventListener("click", (e)=>{
+            e.preventDefault();
+            members.classList.add("show");
+        })
+    </script>
+</html>

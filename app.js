@@ -16,6 +16,7 @@ const moment = require("moment");
 const Message = require("./models/message");
 const Group = require("./models/group");
 const Request = require("./models/join-request")
+const GroupChat = require("./models/groupChats");
 const app = express();
 const server = require("http").createServer(app);
 require("dotenv").config();
@@ -384,14 +385,46 @@ app.patch("/request/approve/:id", protect, async (req, res)=>{
 });
 
 app.get("/group/:grpId", protect, async (req, res)=>{
+    const userId = req.user._id;
     const {grpId} = req.params;
     try {
         const grpDetails = await Group.findOne({_id: grpId});
+        const userDetails = await User.findOne({_id: userId});
         const members = grpDetails.members;
-        console.log(members);
+        let otherMembers = members.filter(member => member !== userDetails.username);
+        
+        res.render("routes/grpChats.ejs", {grpDetails, userDetails, otherMembers});
     } catch(err) {
         res.send("failed to display chats right now!");
     }
-})
+});
 
+app.get("/exit/:grpId/", protect, async (req, res)=>{
+    const username = req.user.username;
+    const {grpId} = req.params;
+    try {
+        const grpDetails = await Group.findOne({_id: grpId});
+        const admin = grpDetails.groupAdmin;
+        const members = grpDetails.members;
+        if(username === admin) {
+            const otherMembers = members.filter(member => member !== username);
+            res.render("routes/newAdmin.ejs", {grpDetails, otherMembers});
+        }
+        await Group.findByIdAndUpdate({_id: grpId}, {$pull: {members: username}});
+        res.redirect("/chats");
+    } catch(err) {
+        res.send("unable to left this group, try again later!");
+    }
+});
 
+app.post("/change-admin/:grpId", async (req, res)=>{
+    const adminObj = req.body;
+    const {grpId} = req.params;
+    try {
+        const newAdmin = adminObj.user;
+        await Group.findByIdAndUpdate({_id: grpId}, {groupAdmin: newAdmin});
+        res.redirect(`/exit/${grpId}`);
+    } catch(err) {
+        res.send("unable to make new admin");
+    }
+});
