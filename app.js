@@ -66,7 +66,10 @@ main()
 });
 
 async function main() {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+    });
 }
 
 const port = process.env.PORT;
@@ -314,7 +317,7 @@ app.get("/chats/group/:grpName", protect, async (req, res)=>{
         let members = grpDetails.members;
 
         if(members.includes(currentUser)) {
-            return res.render("routes/grpChats.ejs", {grpDetails});
+            return res.redirect(`/group/${grpDetails._id}`);
         }
         res.render("routes/illegalMember.ejs", {grpDetails});
     } catch(err) {
@@ -343,10 +346,10 @@ app.get("/requests", protect, async (req, res)=>{
     const username = req.user.username;
     try {
         let requests = await Request.find({admin: username});
-        if(!requests) {
+        if(requests.length === 0) {
             return res.send("when someone wants to join any of your groups, his/her request appears here!");
         }
-        res.render("routes/requestApprovals.ejs", {requests});
+        return res.render("routes/requestApprovals.ejs", {requests});
     } catch(err) {
         console.log("failing to gather info!");
     }
@@ -379,4 +382,16 @@ app.patch("/request/approve/:id", protect, async (req, res)=>{
         console.log(err);
     }
 });
+
+app.get("/group/:grpId", protect, async (req, res)=>{
+    const {grpId} = req.params;
+    try {
+        const grpDetails = await Group.findOne({_id: grpId});
+        const members = grpDetails.members;
+        console.log(members);
+    } catch(err) {
+        res.send("failed to display chats right now!");
+    }
+})
+
 
