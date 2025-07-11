@@ -53,6 +53,26 @@ io.on("connection", (socket) => {
         }
     });
 
+    socket.on("join group", (groupName) => {
+        socket.join(groupName);
+        console.log(`${socket.user.fname} joined group: ${groupName}`);
+    });
+
+    socket.on("group chat", async (msg)=>{
+        try {
+            await GroupChat.create({
+                groupName: msg.groupName,
+                sender: msg.sender,
+                content: msg.content,
+            });
+
+            io.to(msg.groupName).emit("group chat", msg);
+
+        } catch(err) {
+            console.log("Can't keep track of this message!", err);
+        }
+    })
+
     socket.on("disconnect", () => {
         console.log(username, "disconnected");
     });
@@ -224,10 +244,13 @@ app.get("/chats", protect, async (req, res) => {
         const username = details.username;
         let requests = await Request.find({admin: username});
         let otherUsers = users.filter(user => user._id.toString() !== details._id.toString());
-        let recents = await Message.find({$and: [{ users: { $in: [details.fname] } },{ sender: details.fname }]}).sort({ sendAt: -1 });
+        let recents = await Message.find({users: { $in: [details.fname] }}).sort({ sendAt: -1 });        
         let uniqueRecievers = new Set();
         recents.forEach(chat => {
-            uniqueRecievers.add(chat.reciever);
+            const secondUser = chat.users.find(user => user !== details.fname);
+            if (secondUser) {
+                uniqueRecievers.add(secondUser);
+            }
         });
         let recievers = Array.from(uniqueRecievers);
         let recieversUsername = await Promise.all(
@@ -390,10 +413,26 @@ app.get("/group/:grpId", protect, async (req, res)=>{
     try {
         const grpDetails = await Group.findOne({_id: grpId});
         const userDetails = await User.findOne({_id: userId});
+        const grpChats = await GroupChat.find({groupName: grpDetails.groupName}).sort({date: 1});
         const members = grpDetails.members;
         let otherMembers = members.filter(member => member !== userDetails.username);
+        const uniqueDates = new Set();
+        grpChats.forEach(message => {
+            uniqueDates.add(message.date);
+        });
+        const uD = Array.from(uniqueDates);
+        let sortedChats = [];
+        uD.forEach(date => {
+            let subArr = [];
+            grpChats.forEach(chat => {
+                if(chat.date === date) {
+                    subArr.push(chat);
+                }
+            });
+            sortedChats.push(subArr);
+        });
         
-        res.render("routes/grpChats.ejs", {grpDetails, userDetails, otherMembers});
+        res.render("routes/grpChats.ejs", {grpDetails, userDetails, otherMembers, sortedChats});
     } catch(err) {
         res.send("failed to display chats right now!");
     }
@@ -428,3 +467,4 @@ app.post("/change-admin/:grpId", async (req, res)=>{
         res.send("unable to make new admin");
     }
 });
+

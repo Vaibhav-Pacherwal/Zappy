@@ -114,6 +114,10 @@
                 height: 80%;
                 width: 100%;
                 border-bottom: 1px solid black;
+                overflow-y: auto;
+            }
+            .messages::-webkit-scrollbar {
+                display: none;
             }
             .input-msg {
                 height: 70px;
@@ -174,21 +178,35 @@
                     <a href="#" id="exit"><i class="fa-solid fa-right-from-bracket" style="color: #000000;"></i>Exit Group</a>
                 </div>
             </div>
-            <div class="messages"></div>
+            <div class="messages">
+                <% sortedChats.forEach(day => { %>
+                    <p style="text-align: center;"><%= day[0].date %></p>
+                    <% day.forEach(msg => { %>
+                        <p>
+                            <%= msg.sender %>: <%= msg.content %>(<%= msg.time %>)
+                        </p>
+                    <% }) %>
+                <% }) %>
+            </div>
             <div class="input-msg">
                 <form id="inputBox" action="#">
-                    <input type="text" placeholder="Type Your Message Here...">
+                    <input type="text" placeholder="Type Your Message Here..." id="content">
                     <button>Send</button>
                 </form>
             </div>
         </div>
     </body>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         let about = document.getElementById("about");
         let cross = document.getElementById("cross");
         let exitGroup = document.getElementById("exit");
         let yesBtn = document.getElementById("yes");
         let noBtn = document.getElementById("no");
+        let form = document.getElementById("inputBox");
+        let input = document.getElementById("content");
+        let messages = document.querySelector(".messages");
         let confirmationBox  = document.querySelector(".exit-confirmation");
         let detailBox = document.querySelector(".group-info");
         about.addEventListener("click", (e)=>{
@@ -208,5 +226,31 @@
         yesBtn.addEventListener("click", ()=>{
             window.location.href = "/exit/<%= grpDetails._id %>";
         })
+
+        const socket = io();
+        socket.emit("join group", "<%= grpDetails.groupName %>");
+
+        form.addEventListener("submit", (e)=>{
+            e.preventDefault();
+            let currentMessage = input.value.trim();
+            let currTime = moment().format("hh:mm A");
+
+            if (currentMessage !== "") {
+                socket.emit("group chat", {
+                    groupName: "<%= grpDetails.groupName %>",
+                    sender: "<%= userDetails.username %>",
+                    content: currentMessage,
+                    time: currTime
+                });
+                input.value = "";
+            }
+        });
+
+        socket.on("group chat", (msg) => {
+            let p = document.createElement("p");
+            p.innerText = `${msg.sender}: ${msg.content}(${msg.time})`;
+            messages.appendChild(p);
+            messages.scrollTop = messages.scrollHeight;
+        });
     </script>
 </html>

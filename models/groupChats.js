@@ -17,6 +17,7 @@ async function main() {
 }
 
 const grpChatSchema = new mongoose.Schema({
+    groupName: String,
     sender: String,
     content: String,
     date: {
