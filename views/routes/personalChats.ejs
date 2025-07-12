@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
     </head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             margin: 0;
@@ -89,16 +90,33 @@
         .chattings::-webkit-scrollbar {
             display: none;
         }
+        #your-call, #remote-video {
+            width: 40%;
+            height: auto;
+            border-radius: 10px;
+            margin: 10px;
+        }
+        .video-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
     </style>
     <body>
+        <div class="video-container" id="video-section" style="display: none;">
+            <video id="your-call" autoplay playsinline></video>
+            <video id="remote-video" autoplay playsinline></video>
+        </div>
+
         <div class="chat-window">
             <div class="header">
                 <div class="about-reciever">
                     <h1><strong><%= user2.fname %></strong></h1>
                 </div>
                 <div class="features">
-                    <img src="/images/phone.png" alt="voice-call" height="25px" width="25px">
-                    <img src="/images/facetime-button.png" alt="video-call" height="25px" width="25px">
+                    <a href="#" id="audio"><i class="fa-solid fa-phone-volume" style="color: #000000; font-size: 1.5rem;"></i></a>
+                    <a href="#" id="video"><i class="fa-solid fa-video" style="color: #000000; font-size: 1.5rem;"></i></a>
                 </div>
             </div>
             <div class="chattings">
@@ -125,7 +143,31 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        socket.emit("join room", "<%= user1.fname %>");  // 👈 Join room using current user
+        let peerConnection;
+        let isReady = false;
+        let localStream = null;
+        let mySocketId = null;
+        let targetSocketId = null;
+        const roomName = "<%= user1.fname %>";
+
+        socket.on("connect", () => {
+            mySocketId = socket.id;
+            console.log("My socket ID:", mySocketId);
+        });
+
+        socket.emit("join room", "<%= user1.fname %>"); 
+
+        socket.emit("register-user", {
+            room: roomName,
+            name: "<%= user1.fname %>", 
+        });
+
+        socket.emit("get target id", "<%= user2.fname %>");
+
+        socket.on("target id", (targetId) => {
+            targetSocketId = targetId;
+            console.log("Target socket ID:", targetSocketId);
+        });
 
         console.log("Socket connected:", socket.connected);
 
@@ -156,6 +198,142 @@
             messages.appendChild(li);
             messages.scrollTop = messages.scrollHeight;
         });
-    </script>
 
+        document.getElementById("audio").addEventListener("click", (e) => {
+            e.preventDefault();
+            startCall(true);
+        });
+
+        document.getElementById("video").addEventListener("click", (e) => {
+            e.preventDefault();
+            startCall(false);
+        });
+
+        async function startCall(audioOnly = false) {
+            if (!targetSocketId) {
+                alert("⛔ Target user not connected yet!");
+                return;
+            }
+
+            const constraints = audioOnly
+                ? { audio: true, video: false }
+                : { audio: true, video: true };
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                document.getElementById("your-call").srcObject = stream;
+                document.getElementById("video-section").style.display = "flex";
+
+                localStream = stream;
+                peerConnection = createPeerConnection();
+
+                localStream.getTracks().forEach((track) => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                socket.emit("call-user", { target: targetSocketId });
+            } catch (error) {
+                console.error("❌ Error accessing media devices.", error);
+            }
+        }
+
+        function createPeerConnection() {
+            const pc = new RTCPeerConnection();
+
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit("candidate", {
+                        candidate: event.candidate,
+                        target: targetSocketId
+                    });
+                }
+            };
+
+            pc.ontrack = (event) => {
+                console.log("📺 Received remote stream");
+                const remoteVideo = document.getElementById("remote-video");
+
+                if (!remoteVideo.srcObject) {
+                    remoteVideo.srcObject = new MediaStream();
+                }
+
+                event.streams[0].getTracks().forEach((track) => {
+                    remoteVideo.srcObject.addTrack(track);
+                });
+
+                document.getElementById("video-section").style.display = "flex";
+            };
+
+            return pc;
+        }
+
+        socket.on("call-user", async ({ target }) => {
+            console.log("📞 Received call-user from", target);
+            targetSocketId = target;
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                document.getElementById("your-call").srcObject = stream;
+                document.getElementById("video-section").style.display = "flex";
+                localStream = stream;
+
+                peerConnection = createPeerConnection();
+                localStream.getTracks().forEach((track) => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                socket.emit("ready", { from: mySocketId });
+            } catch (error) {
+                console.error("❌ Error accessing media devices.", error);
+            }
+        });
+
+        socket.on("ready", async ({ from }) => {
+            console.log("✅ Received ready from", from);
+            if (isReady) {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                socket.emit("offer", {
+                    offer,
+                    target: from,
+                    from: mySocketId
+                });
+            } else {
+                isReady = true;
+            }
+        });
+
+        socket.on("offer", async ({ offer, from }) => {
+            console.log("📩 Received offer from", from);
+            if (!peerConnection) {
+                peerConnection = createPeerConnection();
+            }
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            socket.emit("answer", { answer, target: from });
+        });
+
+         socket.on("answer", async ({ answer }) => {
+            console.log("✅ Received answer");
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        socket.on("candidate", async ({ candidate }) => {
+            if (peerConnection) {
+                console.log("📡 Adding ICE candidate");
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        window.addEventListener("beforeunload", () => {
+            if (peerConnection) peerConnection.close();
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            socket.disconnect();
+        });
+    </script>
 </html>

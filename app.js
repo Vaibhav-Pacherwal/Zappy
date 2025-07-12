@@ -12,6 +12,7 @@ const {protect} = require("./middleware/authMiddleware");
 const socketAuth = require("./middleware/socketAuth");
 const { info } = require("console");
 const { Server } = require("socket.io");
+const userSocketMap = {};
 const moment = require("moment");
 const Message = require("./models/message");
 const Group = require("./models/group");
@@ -53,6 +54,36 @@ io.on("connection", (socket) => {
         }
     });
 
+   socket.on("register-user", ({ room, name }) => {
+        userSocketMap[name] = socket.id;
+        socket.join(room);
+    });
+
+    socket.on("get target id", (targetName) => {
+        const targetId = userSocketMap[targetName];
+        socket.emit("target id", targetId || null);
+    });
+
+    socket.on("call-user", ({ target }) => {
+        io.to(target).emit("call-user", { target: socket.id });
+    });
+
+    socket.on("ready", ({ from }) => {
+        io.to(from).emit("ready", { from: socket.id });
+    });
+
+    socket.on("offer", ({ offer, target }) => {
+        io.to(target).emit("offer", { offer });
+    });
+
+    socket.on("answer", ({ answer, target }) => {
+        io.to(target).emit("answer", { answer });
+    });
+
+    socket.on("candidate", ({ candidate, target }) => {
+        io.to(target).emit("candidate", { candidate });
+    });
+
     socket.on("join group", (groupName) => {
         socket.join(groupName);
         console.log(`${socket.user.fname} joined group: ${groupName}`);
@@ -77,7 +108,6 @@ io.on("connection", (socket) => {
         console.log(username, "disconnected");
     });
 });
-
 
 main()
 .then(()=>{
@@ -467,4 +497,6 @@ app.post("/change-admin/:grpId", async (req, res)=>{
         res.send("unable to make new admin");
     }
 });
+
+
 
