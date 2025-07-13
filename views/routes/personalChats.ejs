@@ -149,6 +149,7 @@
         let mySocketId = null;
         let targetSocketId = null;
         let isInitiator = false;
+        let remoteStream = null;
         const roomName = "<%= user1.fname %>";
 
         socket.on("connect", () => {
@@ -257,11 +258,10 @@
                 }
             };
 
-            let remoteStream = new MediaStream();
+            if (!remoteStream) remoteStream = new MediaStream();
 
             pc.ontrack = (event) => {
-                console.log("📺 Received remote stream");
-
+                console.log("📺 Received remote track");
                 event.streams[0].getTracks().forEach((track) => {
                     remoteStream.addTrack(track);
                 });
