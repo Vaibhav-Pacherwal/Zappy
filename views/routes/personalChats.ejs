@@ -142,7 +142,9 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
+        const socket = io("http://localhost:8080", {
+            withCredentials: true
+        });
         let peerConnection;
         let isReady = false;
         let localStream = null;
