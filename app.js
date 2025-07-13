@@ -221,7 +221,7 @@ app.post("/login", async (req, res)=>{
         } 
     }catch(err) {
         console.log("can't perform operations right now!");
-        return res.status(400).json({ error: "Can't perform operations right now!", systemErr: err });
+        return res.status(400).json({ error: `Can't perform operations right now! ${err}`});
     }
 });
 
