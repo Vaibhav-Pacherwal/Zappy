@@ -123,9 +123,9 @@ async function main() {
     });
 }
 
-const port = process.env.PORT;
-server.listen(port, ()=>{
-    console.log(`server is running on http://localhost:${port}`);
+const PORT = process.env.PORT;
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 app.use(cookieParser());
