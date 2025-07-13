@@ -267,40 +267,26 @@
                 });
 
                 const remoteVideo = document.getElementById("remote-video");
-                remoteVideo.srcObject = remoteStream;
+                if (remoteVideo.srcObject !== remoteStream) {
+                    remoteVideo.srcObject = remoteStream;
+                }
 
-                document.getElementById("video-section").style.display = "flex";
+                document.getElementById("video-section").style.display = "flex";
             };
 
             return pc;
         }
 
-        socket.on("call-user", async ({ target }) => {
+        socket.on("call-user", ({ target }) => {
             console.log("📞 Received call-user from", target);
             targetSocketId = target;
             isInitiator = false;
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-                document.getElementById("your-call").srcObject = stream;
-                document.getElementById("video-section").style.display = "flex";
-                localStream = stream;
-
-                peerConnection = createPeerConnection();
-                localStream.getTracks().forEach((track) => {
-                    peerConnection.addTrack(track, localStream);
-                });
-
-                socket.emit("ready", { from: mySocketId });
-            } catch (error) {
-                console.error("❌ Error accessing media devices.", error);
-            }
         });
 
         socket.on("ready", async ({ from }) => {
             console.log("✅ Received ready from", from);
 
-            if (isInitiator) {
+            if (isInitiator && peerConnection) {
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
                 socket.emit("offer", {
@@ -313,19 +299,36 @@
 
         socket.on("offer", async ({ offer, from }) => {
             console.log("📩 Received offer from", from);
-            if (!peerConnection) {
-                peerConnection = createPeerConnection();
-            }
+            targetSocketId = from;
 
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            socket.emit("answer", { answer, target: from });
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                document.getElementById("your-call").srcObject = stream;
+                document.getElementById("video-section").style.display = "flex";
+                localStream = stream;
+
+                if (!peerConnection) {
+                    peerConnection = createPeerConnection();
+                }
+
+                localStream.getTracks().forEach((track) => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                socket.emit("answer", { answer, target: from });
+            } catch (error) {
+                console.error("❌ Error accessing media devices on receiving offer", error);
+            }
         });
 
-         socket.on("answer", async ({ answer }) => {
-            console.log("✅ Received answer");
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        socket.on("answer", async ({ answer }) => {
+            console.log("📩 Received answer");
+            if (peerConnection) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+            }
         });
 
         socket.on("candidate", async ({ candidate }) => {
