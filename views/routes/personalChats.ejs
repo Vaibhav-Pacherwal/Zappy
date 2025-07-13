@@ -148,6 +148,7 @@
         let localStream = null;
         let mySocketId = null;
         let targetSocketId = null;
+        let isInitiator = false;
         const roomName = "<%= user1.fname %>";
 
         socket.on("connect", () => {
@@ -232,7 +233,9 @@
                     peerConnection.addTrack(track, localStream);
                 });
 
+                isInitiator = true;
                 socket.emit("call-user", { target: targetSocketId });
+                socket.emit("ready", { from: mySocketId });
             } catch (error) {
                 console.error("❌ Error accessing media devices.", error);
             }
@@ -254,17 +257,17 @@
                 }
             };
 
+            let remoteStream = new MediaStream();
+
             pc.ontrack = (event) => {
                 console.log("📺 Received remote stream");
-                const remoteVideo = document.getElementById("remote-video");
-
-                if (!remoteVideo.srcObject) {
-                    remoteVideo.srcObject = new MediaStream();
-                }
 
                 event.streams[0].getTracks().forEach((track) => {
-                    remoteVideo.srcObject.addTrack(track);
+                    remoteStream.addTrack(track);
                 });
+
+                const remoteVideo = document.getElementById("remote-video");
+                remoteVideo.srcObject = remoteStream;
 
                 document.getElementById("video-section").style.display = "flex";
             };
@@ -275,6 +278,7 @@
         socket.on("call-user", async ({ target }) => {
             console.log("📞 Received call-user from", target);
             targetSocketId = target;
+            isInitiator = false;
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -295,16 +299,15 @@
 
         socket.on("ready", async ({ from }) => {
             console.log("✅ Received ready from", from);
-            if (isReady) {
+
+            if (isInitiator) {
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
                 socket.emit("offer", {
                     offer,
-                    target: from,
+                    target: targetSocketId,
                     from: mySocketId
                 });
-            } else {
-                isReady = true;
             }
         });
 
