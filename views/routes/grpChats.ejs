@@ -12,7 +12,7 @@
                 overflow: hidden;
             }
             .group-info {
-                max-height: 300px;
+                max-height: 400px;
                 width: 250px;
                 background-color: #f8f8fd;
                 border: 2px solid black;
@@ -42,6 +42,24 @@
             }
             .group-info .details {
                 padding-left: 0.5rem;
+            }
+            .group-info .details .oMem {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                overflow-y: auto;
+                margin-top: 0.3rem;
+            }
+            .group-info .details .oMem::-webkit-scrollbar {
+                display: none;
+            }
+            .group-info .details .oMem .mem {
+                padding: 0.3rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid black;
+                border-top: 1px solid black;
             }
             .exit-confirmation {
                 padding: 1rem;
@@ -156,11 +174,23 @@
             </div>
             <div class="details">
                 <strong>Admin: </strong><%= grpDetails.groupAdmin %><br>
-                <strong>Other Members: </strong><% otherMembers.forEach(member => { %>
-                                                    <%= member %> |  
-                                                <% }) %><br>
                 <strong>Date of Creation: </strong><%= grpDetails.date %><br>
-                <strong>createdAt: </strong><%= grpDetails.createdAt %>
+                <strong>createdAt: </strong><%= grpDetails.createdAt %><br>
+                <div class="oMem">
+                    <strong>Other Members</strong>
+                    <% otherMembers.forEach(member => { %>
+                        <div class="mem">
+                            <strong>
+                                <a href="/chat/private/<%= member %>" style="text-decoration: none; color: #000000;">
+                                    <%= member %>
+                                </a>
+                            </strong>
+                            <a href="#" onclick="deleteUser('<%= grpDetails.groupName %>', '<%= member %>')" style="text-decoration: none; color: black;">
+                                <i class="fa-solid fa-trash" style="cursor: pointer;"></i>
+                            </a> 
+                        </div>
+                    <% }) %>
+                </div>
             </div>
         </div>
         <div class="exit-confirmation">
@@ -209,6 +239,7 @@
         let messages = document.querySelector(".messages");
         let confirmationBox  = document.querySelector(".exit-confirmation");
         let detailBox = document.querySelector(".group-info");
+        
         about.addEventListener("click", (e)=>{
             e.preventDefault();
             detailBox.classList.add("show-details");
@@ -252,5 +283,17 @@
             messages.appendChild(p);
             messages.scrollTop = messages.scrollHeight;
         });
+
+        function deleteUser(grpName, nominee) {
+            fetch(`/${grpName}/remove/${nominee}`, {
+                method: "DELETE"
+            })
+            .then(res => {
+                location.reload();
+            })
+            .catch((err) => {
+                console.log("only admin can remove other users!");
+            })
+        }
     </script>
 </html>

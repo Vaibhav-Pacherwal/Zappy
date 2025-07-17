@@ -499,5 +499,37 @@ app.post("/change-admin/:grpId", async (req, res)=>{
     }
 });
 
+app.get("/chat/private/:username", async (req, res)=>{
+    const {username} = req.params;
+    try {
+        const user = await User.findOne({username: username});
+        if(!user) {
+            res.status(404).send("User Not Found!");
+        }
+        const userID = user._id;
+        res.redirect(`/chats/${userID}`);
+    } catch(err) {
+        res.send(err);
+    }
+});
+
+app.delete("/:grpName/remove/:nominee", protect, async(req, res)=>{
+    const user = req.user.username;
+    const {grpName, nominee} = req.params;
+    try {
+        const grpDetails = await Group.findOne({groupName: grpName});
+        const grpAdmin = grpDetails.groupAdmin;
+        console.log(grpDetails)
+        if(grpAdmin !== user) {
+            res.status(400).send("You are not an admin to this group, only admin can remove someone!");
+        } else {
+            await Group.updateOne({groupName: grpName}, {$pull: {members: nominee}});
+            res.redirect(`/group/${grpDetails._id}`);
+        }
+    } catch(err) {
+        console.log(err);
+    }
+});
+
 
 
