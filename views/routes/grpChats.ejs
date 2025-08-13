@@ -107,7 +107,6 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script>
         let about = document.getElementById("about");
         let closeInfo = document.getElementById("close-info");
@@ -200,23 +199,23 @@
         const roomName = "<%= grpDetails.groupName %>";
         const currentUser = "<%= userDetails.username %>";
 
-        socket.emit("join room", roomName);
+        socket.emit("join group", roomName);
 
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             let currentMessage = input.value.trim();
 
             if (currentMessage !== "") {
-                socket.emit("group message", {
+                socket.emit("group chat", {
                     content: currentMessage,
                     sender: currentUser,
-                    room: roomName
+                    groupName: roomName
                 });
                 input.value = "";
             }
         });
 
-        socket.on("group message", (msg) => {
+        socket.on("group chat", (msg) => {
             let li = document.createElement("li");
             li.className = msg.sender === currentUser ? 'sent' : 'received';
             
@@ -238,6 +237,7 @@
             showNotification(`${data.username} left the group`, 'info');
         });
     </script>
+    <script src="/socket.io/socket.io.js"></script>
 </body>
 
 </html>
