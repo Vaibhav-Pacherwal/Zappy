@@ -587,9 +587,24 @@
 
     socket.emit("get target id", "<%= user2.fname %>");
 
+    let targetCheckInterval = setInterval(() => {
+        if (!targetSocketId) {
+            console.log("🔍 Still looking for target user...");
+            socket.emit("get target id", "<%= user2.fname %>");
+        } else {
+            clearInterval(targetCheckInterval);
+        }
+    }, 5000);
+
     socket.on("target id", (targetId) => {
         targetSocketId = targetId;
         console.log("Target socket ID:", targetSocketId);
+        if (!targetId) {
+            showNotification("⚠️ Target user is not online", 'error');
+        } else {
+            showNotification("✅ Target user found and connected", 'success');
+            clearInterval(targetCheckInterval);
+        }
     });
 
     console.log("Socket connected:", socket.connected);
@@ -608,6 +623,7 @@
                 content: currentMessage,
                 sender: "<%= user1.fname %>",
                 reciever: "<%= user2.fname %>",
+                time: currTime
             });
             input.value = "";
         }
@@ -617,7 +633,7 @@
         console.log(msg);
         let li = document.createElement("li");
         li.className = msg.sender === "<%= user1.fname %>" ? 'sent' : 'received';
-        li.innerHTML = `<strong>${msg.sender}</strong>${msg.content}`;
+        li.innerHTML = `<strong>${msg.sender}</strong>${msg.content} (${msg.time})`;
         messages.appendChild(li);
         messages.scrollTop = messages.scrollHeight;
     });
@@ -635,8 +651,12 @@
     async function startCall(audioOnly = false) {
         if (!targetSocketId) {
             showNotification("⛔ Target user not connected yet!", 'error');
+            console.log("❌ No target socket ID found. Waiting for user to connect...");
+            socket.emit("get target id", "<%= user2.fname %>");
             return;
         }
+
+        console.log("🔍 Starting call with target:", targetSocketId);
 
         const constraints = audioOnly
             ? { audio: true, video: false }
@@ -661,6 +681,7 @@
             }
 
             isInitiator = true;
+            console.log("📤 Emitting call-user to:", targetSocketId);
             socket.emit("call-user", { target: targetSocketId });
             showNotification("📞 Starting call...", 'success');
         } catch (error) {
@@ -718,6 +739,7 @@
         isInitiator = false;
         
         try {
+            console.log("🎥 Setting up receiver media...");
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
             document.getElementById("your-call").srcObject = stream;
             document.getElementById("video-section").style.display = "flex";
@@ -731,6 +753,7 @@
                 peerConnection.addTrack(track, localStream);
             });
 
+            console.log("📤 Receiver emitting ready to:", target);
             socket.emit("ready", { from: mySocketId });
             showNotification("📞 Incoming call...", 'success');
         } catch (error) {
@@ -785,14 +808,13 @@
         }
     });
 
-    socket.on("answer", async ({ answer }) => {
-        console.log("📩 Received answer");
+    socket.on("answer", async ({ answer, from }) => {
+        console.log("📩 Received answer from:", from);
         if (peerConnection) {
             try {
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
                 remoteDescSet = true;
 
-                // Process any pending ICE candidates
                 for (const candidate of pendingCandidates) {
                     try {
                         await peerConnection.addIceCandidate(candidate);
@@ -807,7 +829,8 @@
         }
     });
 
-    socket.on("candidate", async ({ candidate }) => {
+    socket.on("candidate", async ({ candidate, from }) => {
+        console.log("📩 Received ICE candidate from:", from);
         if (peerConnection && candidate) {
             try {
                 const iceCandidate = new RTCIceCandidate(candidate);
