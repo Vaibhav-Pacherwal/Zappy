@@ -1,21 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Zappy | Email Verification</title>
-    </head>
-    <style>
-        body {
-            font-size: 1.2rem;
-        }
-    </style>
-    <body>
-        <h1>Email Verification</h1>
-        <form action="/verify-email" method="post">
-            <label for="email">Enter Email: </label>
-            <input type="email" name="email" id="email" required>
-            <button>Send OTP</button>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zappy | Email Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/verifyEmail.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body> 
+    <div class="container">
+        <div class="logo">
+            <h1>Zappy</h1>
+        </div>
+
+        <div class="verification-icon">
+            ✉️
+        </div>
+
+        <h2 class="title">Email Verification</h2>
+        <p class="subtitle">Enter your email address and we'll send you a verification code to get started.</p>
+
+        <form class="form-container" action="/verify-email" method="post">
+            <div class="form-group">
+                <label for="email">Enter Email</label>
+                <input type="email" name="email" id="email" placeholder="you@example.com" required autocomplete="email">
+            </div>
+
+            <button type="submit" class="btn">
+                Send OTP
+            </button>
+
+            <div class="back-link">
+                Already have an account? <a href="/login">Sign in here</a>
+            </div>
         </form>
-    </body>
+    </div>
+</body>
+
 </html>

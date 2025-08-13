@@ -1,28 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Zappy</title>
-    </head>
-    <style>
-        body {
-            font-size: 1.2rem;
-        }
-    </style>
-    <body>
-        <h1>Zappy</h1>
-        <button id="signup">Create Account</button>
-        <button id="login">Login</button>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zappy - Modern Team Communication</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Zappy</div>
+            <div class="nav-buttons">
+                <button class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="nav-menu" id="nav-menu">
+                    <button id="login" class="btn btn-outline">Login</button>
+                    <button id="signup" class="btn btn-primary">Get Started</button>
+                </div>
+                <div class="nav-menu mobile-menu" id="mobile-menu">
+                    <button id="login-mobile" class="btn btn-outline">Login</button>
+                    <button id="signup-mobile" class="btn btn-primary">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Personal Communication Made Simple</h1>
+            <p class="hero-subtitle">
+                Connect with friends, family, and colleagues through lightning-fast messaging and crystal-clear voice calls. 
+                Built with modern web technologies for seamless one-to-one conversations.
+            </p>
+            
+            <div class="hero-buttons">
+                <button class="btn btn-primary btn-hero">Start Chatting</button>
+                <button class="btn btn-outline btn-hero">Learn More</button>
+            </div>
+            
+            <div class="chat-preview">
+                <div class="chat-header">
+                    <div class="user-avatar">AM</div>
+                    <div class="user-info">
+                        <h4>Alex Morgan</h4>
+                        <div class="user-status">
+                            <div class="status-dot"></div>
+                            Online now
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-messages">
+                    <div class="message message-received">Hey! How was your presentation today?</div>
+                    <div class="message message-sent">It went amazing! Thanks for the tips 🎉</div>
+                    <div class="message message-received">Awesome! Want to celebrate over coffee?</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="features-container">
+            <h2 class="features-title">Everything you need for personal conversations</h2>
+            <p class="features-subtitle">
+                Powerful features designed to make personal communication seamless, private, and enjoyable.
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon realtime">⚡</div>
+                    <h3 class="feature-title">Real-time Messaging</h3>
+                    <p class="feature-description">
+                        Instant message delivery with WebSocket technology. 
+                        See typing indicators and read receipts in real-time for natural conversations.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon secure">🔒</div>
+                    <h3 class="feature-title">Secure & Private</h3>
+                    <p class="feature-description">
+                        End-to-end encryption ensures your personal conversations stay completely private. 
+                        Built with security-first architecture you can trust.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon calls">📞</div>
+                    <h3 class="feature-title">Voice & Video Calls</h3>
+                    <p class="feature-description">
+                        High-quality personal calls powered by WebRTC. 
+                        Crystal clear audio and video with minimal latency for meaningful conversations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-stack">
+        <div class="tech-container">
+            <h3 class="tech-title">Built with Modern Technology</h3>
+            <div class="tech-grid">
+                <div class="tech-item">Node.js</div>
+                <div class="tech-item">WebSocket</div>
+                <div class="tech-item">WebRTC</div>
+                <div class="tech-item">EJS Templates</div>
+            </div>
+        </div>
+    </section>
+
     <script>
         const signup = document.getElementById("signup");
         const login = document.getElementById("login");
-        signup.addEventListener("click", ()=>{
+        const signupMobile = document.getElementById("signup-mobile");
+        const loginMobile = document.getElementById("login-mobile");
+        const hamburger = document.getElementById("hamburger");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        signup?.addEventListener("click", () => {
             window.location.href = "/signup-form";
         });
-        login.addEventListener("click", ()=>{
+        
+        login?.addEventListener("click", () => {
             window.location.href = "/login-form";
-        })
+        });
+
+        signupMobile?.addEventListener("click", () => {
+            window.location.href = "/signup-form";
+        });
+        
+        loginMobile?.addEventListener("click", () => {
+            window.location.href = "/login-form";
+        });
+
+        hamburger?.addEventListener("click", () => {
+            hamburger.classList.toggle("active");
+            mobileMenu.classList.toggle("active");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+                hamburger.classList.remove("active");
+                mobileMenu.classList.remove("active");
+            }
+        });
+
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 20) {
+                navbar.style.background = 'rgba(247, 247, 248, 0.98)';
+                navbar.style.boxShadow = '0 1px 3px 0 rgb(0 0 0 / 0.1)';
+            } else {
+                navbar.style.background = 'rgba(247, 247, 248, 0.95)';
+                navbar.style.boxShadow = 'none';
+            }
+        });
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, index * 100);
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                observer.observe(card);
+            });
+            
+            const techItems = document.querySelectorAll('.tech-item');
+            techItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.borderColor = 'var(--accent-primary)';
+                });
+                item.addEventListener('mouseleave', () => {
+                    item.style.borderColor = 'var(--border-light)';
+                });
+            });
+        });
     </script>
+</body>
 </html>

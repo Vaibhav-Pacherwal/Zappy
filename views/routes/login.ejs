@@ -1,25 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Zappy | Login</title>
-    </head>
-    <style>
-        body {
-            font-size: 1.2rem;
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zappy | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+
+<body>  
+    <div class="container">
+        <div class="logo">
+            <h1>Zappy</h1>
+            <p>Welcome back! Sign in to continue</p>
+        </div>
+
+        <form class="form-container" action="/login" method="post" id="loginForm">
+            <div id="errorMessage" class="error-message"></div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="@johndoe123" required
+                    autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="pass">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" name="password" id="pass" placeholder="Enter your password" required
+                        autocomplete="current-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        👁️
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-options">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+                <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn">
+                Sign In
+            </button>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <a href="/verification" class="email-login">
+                📧 Continue with Email Verification
+            </a>
+
+            <div class="signup-link">
+                Don't have an account? <a href="/signup-form">Create one here</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('pass');
+            const toggleButton = document.querySelector('.password-toggle');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.textContent = '👁️';
+            }
         }
-    </style>
-    <body>
-        <h1>Login</h1>
-        <form action="/login" method="post">
-            <label for="username">Username</label>
-            <input type="text" name="username" id="username" placeholder="@johndoe123" required>
-            <br>
-            <label for="pass">Password</label>
-            <input type="password" name="password" id="pass" placeholder="Create a strong passowrd" required>
-            <br>
-            <a href="/verification">Continue With Email</a><br>
-            <button>Login</button>
-    </body>
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            const btn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            errorMessage.style.display = 'none';
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('pass').value;
+
+            if (!username || !password) {
+                e.preventDefault();
+                showError('Please fill in all fields');
+                resetButton();
+                return;
+            }
+
+            if (username.length < 3) {
+                e.preventDefault();
+                showError('Username must be at least 3 characters long');
+                resetButton();
+                return;
+            }
+
+            if (password.length < 6) {
+                e.preventDefault();
+                showError('Password must be at least 6 characters long');
+                resetButton();
+                return;
+            }
+
+            setTimeout(resetButton, 3000);
+        });
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function resetButton() {
+            const btn = document.getElementById('loginBtn');
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('username').focus();
+        });
+
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        const inputs = document.querySelectorAll('input[required]');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '') {
+                    this.style.borderColor = 'var(--error)';
+                } else {
+                    this.style.borderColor = 'var(--border-medium)';
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.style.borderColor === 'var(--error)' && this.value.trim() !== '') {
+                    this.style.borderColor = 'var(--border-medium)';
+                }
+            });
+        });
+    </script>
+</body>
+
 </html>

@@ -18,6 +18,8 @@ const Message = require("./models/message");
 const Group = require("./models/group");
 const Request = require("./models/join-request")
 const GroupChat = require("./models/groupChats");
+const session = require("express-session");
+const flash = require("connect-flash");
 const app = express();
 const server = require("http").createServer(app);
 require("dotenv").config();
@@ -128,6 +130,7 @@ server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+app.engine("ejs", ejsMate);
 app.use(cookieParser());
 app.use(express.json());
 app.set("view engine", "ejs");
@@ -135,6 +138,23 @@ app.set("views", path.join(__dirname, "/views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(methodOverride("_method"));
 app.use(express.urlencoded({extended:true}));
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true
+    }
+}));
+
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
 
 const transport = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
@@ -215,6 +235,7 @@ app.post("/login", async (req, res)=>{
                 maxAge: 30 * 24 * 60 * 60 * 1000
             });
 
+            req.flash("success", "Welcome to Zappy by vaibhav!");
             return res.redirect("/chats");
         } else {
             return res.status(401).json({ message: "Invalid Username or Password" });
@@ -519,7 +540,6 @@ app.delete("/:grpName/remove/:nominee", protect, async(req, res)=>{
     try {
         const grpDetails = await Group.findOne({groupName: grpName});
         const grpAdmin = grpDetails.groupAdmin;
-        console.log(grpDetails)
         if(grpAdmin !== user) {
             res.status(400).send("You are not an admin to this group, only admin can remove someone!");
         } else {

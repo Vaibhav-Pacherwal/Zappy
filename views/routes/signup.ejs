@@ -1,40 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Zappy | SignUp</title>
-    </head>
-    <style>
-        body {
-            font-size: 1.2rem;
-        }
-    </style>
-    <body>
-        <h1>SignUp</h1>
-        <form action="/signup" method="post">
-            <label for="fname">First Name</label>
-            <input type="text" name="fname" id="fname" placeholder="e.g., John" required>
-            <br>
-            <label for="lname">Last Name</label>
-            <input type="text" name="lname" id="lname" placeholder="e.g., Doe" required>
-            <br>
-            <label for="username">Username</label>
-            <input type="text" name="username" id="username" placeholder="@johndoe123" required>
-            <br>
-            <label for="email">Email</label>
-            <input type="email" name="email" id="email" placeholder="you@example.com" required>
-            <br>
-            <label for="phone">Phone Number</label>
-            <input type="text" name="phone" id="phone" placeholder="+91XXXXXXXXXX" required>
-            <br>
-            <label for="pass">Password</label>
-            <input type="password" name="password" id="pass" placeholder="Create a strong passowrd" required>
-            <br>
-            <label for="confirmedPass">Confirm Password</label>
-            <input type="password" name="confirmedPass" id="confirmedPass" placeholder="Re-enter your password" required>
-            <br>
-            <button>Create Account</button>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zappy | Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+
+<body> 
+    <div class="container">
+        <div class="logo">
+            <h1>Zappy</h1>
+            <p>Create your account to get started</p>
+        </div>
+
+        <form class="form-container" action="/signup" method="post" id="signupForm">
+            <div id="errorMessage" class="error-message"></div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fname">First Name</label>
+                    <input type="text" name="fname" id="fname" placeholder="John" required autocomplete="given-name">
+                    <div class="field-feedback" id="fnameError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="lname">Last Name</label>
+                    <input type="text" name="lname" id="lname" placeholder="Doe" required autocomplete="family-name">
+                    <div class="field-feedback" id="lnameError"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="@johndoe123" required
+                    autocomplete="username">
+                <div class="field-feedback" id="usernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="you@example.com" required autocomplete="email">
+                <div class="field-feedback" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" name="phone" id="phone" placeholder="+91 98765 43210" required autocomplete="tel">
+                <div class="field-feedback" id="phoneError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="pass">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" name="password" id="pass" placeholder="Create a strong password" required
+                        autocomplete="new-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('pass', this)">
+                        👁️
+                    </button>
+                </div>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="password-strength-bar">
+                        <div class="password-strength-fill"></div>
+                    </div>
+                    <div class="password-strength-text"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmedPass">Confirm Password</label>
+                <div class="input-wrapper">
+                    <input type="password" name="confirmedPass" id="confirmedPass" placeholder="Re-enter your password"
+                        required autocomplete="new-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirmedPass', this)">
+                        👁️
+                    </button>
+                </div>
+                <div class="field-feedback" id="confirmPassError"></div>
+            </div>
+
+            <button type="submit" class="btn" id="signupBtn">
+                Create Account
+            </button>
+
+            <div class="login-link">
+                Already have an account? <a href="/login-form">Sign in here</a>
+            </div>
         </form>
-    </body>
+    </div>
+
+    <script>
+        function togglePassword(inputId, button) {
+            const passwordInput = document.getElementById(inputId);
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            const strengthIndicator = document.getElementById('passwordStrength');
+            const strengthBar = document.getElementById('passwordStrengthBar');
+
+            if (password.length === 0) {
+                strengthIndicator.style.display = 'none';
+                return;
+            }
+
+            strengthIndicator.style.display = 'block';
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            strengthBar.className = 'password-strength-bar';
+
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength <= 3) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        }
+
+        document.getElementById('pass').addEventListener('input', function (e) {
+            checkPasswordStrength(e.target.value);
+        });
+
+        document.getElementById('confirmedPass').addEventListener('input', function (e) {
+            const password = document.getElementById('pass').value;
+            const confirmPassword = e.target.value;
+
+            if (confirmPassword && password !== confirmPassword) {
+                e.target.style.borderColor = 'var(--error)';
+            } else {
+                e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+            }
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function (e) {
+            const btn = document.getElementById('signupBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            errorMessage.style.display = 'none';
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const firstName = document.getElementById('fname').value.trim();
+            const lastName = document.getElementById('lname').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('pass').value;
+            const confirmPassword = document.getElementById('confirmedPass').value;
+
+            if (!firstName || firstName.length < 2) {
+                e.preventDefault();
+                showError('First name must be at least 2 characters long');
+                resetButton();
+                return;
+            }
+
+            if (!lastName || lastName.length < 2) {
+                e.preventDefault();
+                showError('Last name must be at least 2 characters long');
+                resetButton();
+                return;
+            }
+
+            if (!username || username.length < 3) {
+                e.preventDefault();
+                showError('Username must be at least 3 characters long');
+                resetButton();
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_@]+$/.test(username)) {
+                e.preventDefault();
+                showError('Username can only contain letters, numbers, and underscores');
+                resetButton();
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                showError('Please enter a valid email address');
+                resetButton();
+                return;
+            }
+
+            const phoneRegex = /^\+?[1-9]\d{9,14}$/;
+            if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
+                e.preventDefault();
+                showError('Please enter a valid phone number');
+                resetButton();
+                return;
+            }
+
+            if (password.length < 6) {
+                e.preventDefault();
+                showError('Password must be at least 6 characters long');
+                resetButton();
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                showError('Passwords do not match');
+                resetButton();
+                return;
+            }
+
+            setTimeout(resetButton, 3000);
+        });
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function resetButton() {
+            const btn = document.getElementById('signupBtn');
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('fname').focus();
+        });
+
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('signupForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+
 </html>

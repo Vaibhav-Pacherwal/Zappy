@@ -1,23 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Zappy | OTP Verification</title>
-    </head>
-    <style>
-        body {
-            font-size: 1.2rem;
-        }
-    </style>
-    <body>
-        <h1>Email Verification</h1>
-        <form action="/verify-otp" method="post">
-            <label for="email">Enter Email: </label>
-            <input type="email" name="email" id="email" value="<%= email %>" required><br>
-            <label for="otp">Enter OTP: </label>
-            <input type="text" name="otp" id="otp" required>
-            <button>Verify OTP</button>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zappy | OTP Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/otp.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body> 
+    <div class="container">
+        <div class="logo">
+            <h1>Zappy</h1>
+        </div>
+
+        <div class="verification-icon">
+            📧
+        </div>
+
+        <p class="subtitle">We've sent a verification code to your email. Please enter the code below to verify your account.</p>
+
+        <form class="form-container" action="/verify-otp" method="post">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" name="email" id="email" value="<%= email %>" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="otp">Enter OTP Code</label>
+                <input type="text" name="otp" id="otp" placeholder="Enter 6-digit code" required autocomplete="one-time-code">
+            </div>
+
+            <button type="submit" class="btn">
+                Verify OTP
+            </button>
+
+            <div class="back-link">
+                Didn't receive the code? <a href="/resend-otp">Resend OTP</a>
+            </div>
         </form>
-    </body>
+    </div>
+</body>
+
 </html>
