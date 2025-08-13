@@ -186,7 +186,6 @@
             messages.scrollTop = messages.scrollHeight;
         });
 
-        // WebRTC Configuration
         const pcConfig = {
             iceServers: [
                 { urls: "stun:stun.l.google.com:19302" },
@@ -201,7 +200,6 @@
 
             const pc = new RTCPeerConnection(pcConfig);
 
-            // Handle ICE candidates
             pc.onicecandidate = (event) => {
                 console.log("🧊 ICE candidate event:", event.candidate);
                 if (event.candidate && targetSocketId) {
@@ -212,7 +210,6 @@
                 }
             };
 
-            // Handle connection state changes
             pc.onconnectionstatechange = () => {
                 console.log("🔗 Connection state:", pc.connectionState);
                 updateCallStatus(pc.connectionState);
@@ -222,7 +219,6 @@
                 console.log("🧊 ICE connection state:", pc.iceConnectionState);
             };
 
-            // Handle incoming tracks - THIS IS CRUCIAL
             pc.ontrack = (event) => {
                 console.log("📺 Received remote track:", event);
                 console.log("📺 Track kind:", event.track.kind);
@@ -241,7 +237,6 @@
                         };
                     }
 
-                    // Ensure video container is visible
                     const videoSection = document.getElementById("video-section");
                     const callControls = document.getElementById("call-controls");
                     if (videoSection) videoSection.style.display = "flex";
@@ -276,7 +271,6 @@
             }
         }
 
-        // Start call function
         async function startCall(audioOnly = false) {
             if (callInProgress) {
                 showNotification("📞 Call already in progress", 'info');
@@ -308,27 +302,22 @@
 
                 localStream = stream;
 
-                // Set up local video
                 const localVideo = document.getElementById("your-call");
                 if (localVideo) {
                     localVideo.srcObject = stream;
-                    localVideo.muted = true; // Always mute local video to prevent feedback
+                    localVideo.muted = true; 
                 }
 
-                // Show video container
                 document.getElementById("video-section").style.display = "flex";
                 document.getElementById("call-controls").style.display = "flex";
 
-                // Create peer connection
                 peerConnection = createPeerConnection();
 
-                // Add local stream tracks to peer connection
                 stream.getTracks().forEach((track) => {
                     console.log("➕ Adding track to peer connection:", track.kind);
                     peerConnection.addTrack(track, stream);
                 });
 
-                // Set button states
                 updateCallButtons(true);
 
                 isInitiator = true;
@@ -357,7 +346,6 @@
             }
         }
 
-        // Call button event listeners
         document.getElementById("audio").addEventListener("click", (e) => {
             e.preventDefault();
             startCall(true);
@@ -372,7 +360,6 @@
             console.log("📞 Received incoming call from:", target);
             targetSocketId = target;
 
-            // Show call modal for user to accept/reject
             showIncomingCallModal(target);
         });
 
@@ -380,7 +367,6 @@
             const modal = document.getElementById('call-modal');
             modal.style.display = 'flex';
 
-            // Play notification sound (optional)
             showNotification("📞 Incoming call...", 'info');
         }
 
@@ -389,7 +375,6 @@
             modal.style.display = 'none';
         }
 
-        // Accept call button
         document.getElementById('accept-call').addEventListener('click', async () => {
             console.log("✅ Call accepted");
             hideIncomingCallModal();
@@ -410,23 +395,19 @@
                 localStream = stream;
                 callInProgress = true;
 
-                // Set up local video
                 const localVideo = document.getElementById("your-call");
                 if (localVideo) {
                     localVideo.srcObject = stream;
                     localVideo.muted = true;
                 }
 
-                // Show video container
                 document.getElementById("video-section").style.display = "flex";
                 document.getElementById("call-controls").style.display = "flex";
 
-                // Create peer connection
                 if (!peerConnection) {
                     peerConnection = createPeerConnection();
                 }
 
-                // Add local stream tracks
                 stream.getTracks().forEach((track) => {
                     console.log("➕ Adding track to peer connection:", track.kind);
                     peerConnection.addTrack(track, stream);
@@ -446,7 +427,6 @@
             }
         });
 
-        // Reject call button
         document.getElementById('reject-call').addEventListener('click', () => {
             console.log("❌ Call rejected");
             hideIncomingCallModal();
@@ -487,7 +467,6 @@
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
                     remoteDescSet = true;
 
-                    // Process any pending ICE candidates
                     for (const candidate of pendingCandidates) {
                         try {
                             await peerConnection.addIceCandidate(candidate);
