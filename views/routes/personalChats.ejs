@@ -147,11 +147,11 @@
             if (!targetId) {
                 statusEl.textContent = "User offline";
                 statusEl.style.color = '#ef4444';
-                showNotification("⚠️ Target user is not online", 'error');
+                showNotification("⚠️ <%= user2.fname %> is not online", 'error');
             } else {
                 statusEl.textContent = "Active now";
                 statusEl.style.color = 'var(--success)';
-                showNotification("✅ User connected", 'success');
+                showNotification("✅ <%= user2.fname %> connected", 'success');
                 clearInterval(targetCheckInterval);
             }
         });
