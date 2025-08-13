@@ -536,14 +536,15 @@
                         <%= subChat[0].date %>
                     </p>
                     <% subChat.forEach((chat)=>{ %>
+                        <%= chat.sendAt %>
                         <li class="<%= chat.sender === user1.fname ? 'sent' : 'received' %>">
                             <strong>
                                 <%= chat.sender %>
                             </strong>
-                            <%= chat.content %> (<%= chat.sendAt %>)
+                            <%= chat.content %>
                         </li>
                         <% }) %>
-                            <% }) %>
+                    <% }) %>
             </ul>
         </div>
 
