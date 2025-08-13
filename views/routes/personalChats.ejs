@@ -71,7 +71,7 @@
 
         <div class="chattings">
             <ul id="messages">
-                <% sortedChats.forEach((subChat)=>{ %>
+                <% sortedChats.slice().reverse().forEach((subChat) => { %>
                     <p>
                         <%= subChat[0].date %>
                     </p>
@@ -83,7 +83,7 @@
                             <%= chat.content %>
                         </li>
                         <% }) %>
-                            <% }) %>
+                <% }) %>
             </ul>
         </div>
 
