@@ -611,3 +611,13 @@ body {
     background: #dc2626;
     transform: scale(1.1);
 }
+
+.chattings {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+#messages {
+    display: flex;
+    flex-direction: column;
+}
