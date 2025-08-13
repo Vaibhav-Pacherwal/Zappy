@@ -543,7 +543,7 @@
                             <%= chat.content %>
                         </li>
                         <% }) %>
-                    <% }) %>
+                            <% }) %>
             </ul>
         </div>
 
@@ -559,337 +559,135 @@
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    const socket = io("https://zappy-3.onrender.com", {
-        withCredentials: true
-    });
-    let peerConnection;
-    let isReady = false;
-    let localStream = null;
-    let mySocketId = null;
-    let targetSocketId = null;
-    let isInitiator = false;
-    let remoteStream = null;
-    const roomName = "<%= user1.fname %>";
-    let pendingCandidates = [];
-    let remoteDescSet = false;
-
-    socket.on("connect", () => {
-        mySocketId = socket.id;
-        console.log("My socket ID:", mySocketId);
-    });
-
-    socket.emit("join room", "<%= user1.fname %>");
-
-    socket.emit("register-user", {
-        room: roomName,
-        name: "<%= user1.fname %>",
-    });
-
-    socket.emit("get target id", "<%= user2.fname %>");
-
-    let targetCheckInterval = setInterval(() => {
-        if (!targetSocketId) {
-            console.log("🔍 Still looking for target user...");
-            socket.emit("get target id", "<%= user2.fname %>");
-        } else {
-            clearInterval(targetCheckInterval);
-        }
-    }, 5000);
-
-    socket.on("target id", (targetId) => {
-        targetSocketId = targetId;
-        console.log("Target socket ID:", targetSocketId);
-        if (!targetId) {
-            showNotification("⚠️ Target user is not online", 'error');
-        } else {
-            showNotification("✅ Target user found and connected", 'success');
-            clearInterval(targetCheckInterval);
+    const io = new Server(server, {
+        cors: {
+            origin: "*",
+            credentials: true
         }
     });
 
-    console.log("Socket connected:", socket.connected);
+    let userSocketMap = {};
 
-    let form = document.querySelector("form");
-    let input = document.getElementById("currMsg");
-    let messages = document.getElementById("messages");
+    io.use(socketAuth);
 
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        let currentMessage = input.value.trim();
-        let currTime = moment().format("hh:mm A");
+    io.on("connection", (socket) => {
+        const username = socket.user.fname;
+        console.log(username, "connected");
 
-        if (currentMessage !== "") {
-            socket.emit("chat message", {
-                content: currentMessage,
-                sender: "<%= user1.fname %>",
-                reciever: "<%= user2.fname %>",
-                time: currTime
-            });
-            input.value = "";
-        }
-    });
+        socket.join(username);
 
-    socket.on("chat message", (msg) => {
-        console.log(msg);
-        let li = document.createElement("li");
-        li.className = msg.sender === "<%= user1.fname %>" ? 'sent' : 'received';
-        li.innerHTML = `<strong>${msg.sender}</strong>${msg.content} (${msg.time})`;
-        messages.appendChild(li);
-        messages.scrollTop = messages.scrollHeight;
-    });
+        socket.on("chat message", async (msg) => {
+            try {
+                await Message.create({
+                    sender: msg.sender,
+                    reciever: msg.reciever,
+                    content: msg.content,
+                    users: [msg.sender, msg.reciever]
+                });
 
-    document.getElementById("audio").addEventListener("click", (e) => {
-        e.preventDefault();
-        startCall(true);
-    });
-
-    document.getElementById("video").addEventListener("click", (e) => {
-        e.preventDefault();
-        startCall(false);
-    });
-
-    async function startCall(audioOnly = false) {
-        if (!targetSocketId) {
-            showNotification("⛔ Target user not connected yet!", 'error');
-            console.log("❌ No target socket ID found. Waiting for user to connect...");
-            socket.emit("get target id", "<%= user2.fname %>");
-            return;
-        }
-
-        console.log("🔍 Starting call with target:", targetSocketId);
-
-        const constraints = audioOnly
-            ? { audio: true, video: false }
-            : { audio: true, video: true };
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-            document.getElementById("your-call").srcObject = stream;
-            document.getElementById("video-section").style.display = "flex";
-
-            localStream = stream;
-            peerConnection = createPeerConnection();
-
-            localStream.getTracks().forEach((track) => {
-                peerConnection.addTrack(track, localStream);
-            });
-
-            if (targetSocketId === mySocketId) {
-                console.warn("🚫 You're calling yourself! Aborting call...");
-                return;
+                io.to(msg.sender).emit("chat message", msg);
+                io.to(msg.reciever).emit("chat message", msg);
+            } catch (err) {
+                console.log("Can't keep track of this message!", err);
             }
-
-            isInitiator = true;
-            console.log("📤 Emitting call-user to:", targetSocketId);
-            socket.emit("call-user", { target: targetSocketId });
-            showNotification("📞 Starting call...", 'success');
-        } catch (error) {
-            console.error("❌ Error accessing media devices.", error);
-            showNotification("❌ Could not access camera/microphone", 'error');
-        }
-    }
-
-    function createPeerConnection() {
-        const pc = new RTCPeerConnection({
-            iceServers: [
-                { urls: "stun:stun.l.google.com:19302" }
-            ]
         });
 
-        pc.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit("candidate", {
-                    candidate: event.candidate,
-                    target: targetSocketId
-                });
-            }
-        };
-
-        pc.onconnectionstatechange = () => {
-            console.log("Connection state:", pc.connectionState);
-        };
-
-        pc.oniceconnectionstatechange = () => {
-            console.log("ICE connection state:", pc.iceConnectionState);
-        };
-
-        if (!remoteStream) remoteStream = new MediaStream();
-
-        pc.ontrack = (event) => {
-            console.log("📺 Received remote track");
-            event.streams[0].getTracks().forEach((track) => {
-                remoteStream.addTrack(track);
-            });
-
-            const remoteVideo = document.getElementById("remote-video");
-            if (remoteVideo.srcObject !== remoteStream) {
-                remoteVideo.srcObject = remoteStream;
-            }
-
-            document.getElementById("video-section").style.display = "flex";
-        };
-
-        return pc;
-    }
-
-    socket.on("call-user", async ({ target }) => {
-        console.log("📞 Received call-user from", target);
-        targetSocketId = target;
-        isInitiator = false;
-        
-        try {
-            console.log("🎥 Setting up receiver media...");
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-            document.getElementById("your-call").srcObject = stream;
-            document.getElementById("video-section").style.display = "flex";
-            localStream = stream;
-
-            if (!peerConnection) {
-                peerConnection = createPeerConnection();
-            }
-
-            localStream.getTracks().forEach((track) => {
-                peerConnection.addTrack(track, localStream);
-            });
-
-            console.log("📤 Receiver emitting ready to:", target);
-            socket.emit("ready", { from: mySocketId });
-            showNotification("📞 Incoming call...", 'success');
-        } catch (error) {
-            console.error("❌ Error accessing media devices on incoming call", error);
-            showNotification("❌ Could not access camera/microphone", 'error');
-        }
-    });
-
-    socket.on("ready", async ({ from }) => {
-        console.log("✅ Received ready from", from);
-
-        if (isInitiator && peerConnection) {
-            try {
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                socket.emit("offer", {
-                    offer,
-                    target: targetSocketId,
-                    from: mySocketId
-                });
-            } catch (error) {
-                console.error("❌ Error creating offer:", error);
-            }
-        }
-    });
-
-    socket.on("offer", async ({ offer, from }) => {
-        console.log("📩 Received offer from", from);
-        targetSocketId = from;
-
-        if (peerConnection) {
-            try {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-                remoteDescSet = true;
-                
-                // Process any pending ICE candidates
-                for (const candidate of pendingCandidates) {
-                    try {
-                        await peerConnection.addIceCandidate(candidate);
-                    } catch (err) {
-                        console.error("❌ Error adding queued ICE candidate:", err);
-                    }
-                }
-                pendingCandidates = [];
-                
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                socket.emit("answer", { answer, target: from });
-            } catch (error) {
-                console.error("❌ Error processing offer:", error);
-            }
-        }
-    });
-
-    socket.on("answer", async ({ answer, from }) => {
-        console.log("📩 Received answer from:", from);
-        if (peerConnection) {
-            try {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-                remoteDescSet = true;
-
-                for (const candidate of pendingCandidates) {
-                    try {
-                        await peerConnection.addIceCandidate(candidate);
-                    } catch (err) {
-                        console.error("❌ Error adding queued ICE candidate:", err);
-                    }
-                }
-                pendingCandidates = [];
-            } catch (error) {
-                console.error("❌ Error processing answer:", error);
-            }
-        }
-    });
-
-    socket.on("candidate", async ({ candidate, from }) => {
-        console.log("📩 Received ICE candidate from:", from);
-        if (peerConnection && candidate) {
-            try {
-                const iceCandidate = new RTCIceCandidate(candidate);
-                if (remoteDescSet) {
-                    await peerConnection.addIceCandidate(iceCandidate);
-                } else {
-                    pendingCandidates.push(iceCandidate);
-                }
-            } catch (error) {
-                console.error("❌ Error processing ICE candidate:", error);
-            }
-        }
-    });
-
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-
-    function endCall() {
-        if (peerConnection) {
-            peerConnection.close();
-            peerConnection = null;
-        }
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            localStream = null;
-        }
-        if (remoteStream) {
-            remoteStream.getTracks().forEach(track => track.stop());
-            remoteStream = null;
-        }
-        document.getElementById("video-section").style.display = "none";
-        isInitiator = false;
-        remoteDescSet = false;
-        pendingCandidates = [];
-    }
-
-    const endCallBtn = document.getElementById("end-call");
-    if (endCallBtn) {
-        endCallBtn.addEventListener("click", () => {
-            endCall();
-            socket.emit("call-ended", { target: targetSocketId });
+        socket.on("register-user", ({ room, name }) => {
+            userSocketMap[name] = socket.id;
+            socket.join(room);
+            console.log(`User ${name} registered with socket ID: ${socket.id}`);
+            console.log("Current userSocketMap:", userSocketMap);
         });
-    }
 
-    socket.on("call-ended", () => {
-        endCall();
-        showNotification("📞 Call ended", 'info');
-    });
+        socket.on("get target id", (targetName) => {
+            const targetId = userSocketMap[targetName];
+            console.log(`Looking for ${targetName}, found: ${targetId}`);
+            socket.emit("target id", targetId || null);
+        });
 
-    window.addEventListener("beforeunload", () => {
-        endCall();
-        socket.disconnect();
+        socket.on("call-user", ({ target, callerName, audioOnly }) => {
+            console.log(`Call initiated from ${socket.id} to ${target}`);
+            io.to(target).emit("call-user", {
+                target: socket.id,
+                callerName: callerName,
+                audioOnly: audioOnly
+            });
+        });
+
+        socket.on("call-accepted", ({ target }) => {
+            console.log(`Call accepted by ${socket.id}, notifying ${target}`);
+            io.to(target).emit("call-accepted", { from: socket.id });
+        });
+
+        socket.on("call-declined", ({ target }) => {
+            console.log(`Call declined by ${socket.id}, notifying ${target}`);
+            io.to(target).emit("call-declined", { from: socket.id });
+        });
+
+        socket.on("ready", ({ from }) => {
+            console.log(`Ready signal from ${socket.id} to ${from}`);
+            io.to(from).emit("ready", { from: socket.id });
+        });
+
+        socket.on("offer", ({ offer, target, from }) => {
+            console.log(`Offer from ${socket.id} to ${target}`);
+            io.to(target).emit("offer", {
+                offer,
+                from: socket.id 
+            });
+        });
+
+        socket.on("answer", ({ answer, target }) => {
+            console.log(`Answer from ${socket.id} to ${target}`);
+            io.to(target).emit("answer", {
+                answer,
+                from: socket.id 
+            });
+        });
+
+        socket.on("candidate", ({ candidate, target }) => {
+            console.log(`ICE candidate from ${socket.id} to ${target}`);
+            io.to(target).emit("candidate", {
+                candidate,
+                from: socket.id 
+            });
+        });
+
+        socket.on("call-ended", ({ target }) => {
+            console.log(`Call ended by ${socket.id}, notifying ${target}`);
+            io.to(target).emit("call-ended", { from: socket.id });
+        });
+
+        socket.on("join group", (groupName) => {
+            socket.join(groupName);
+            console.log(`${socket.user.fname} joined group: ${groupName}`);
+        });
+
+        socket.on("group chat", async (msg) => {
+            try {
+                await GroupChat.create({
+                    groupName: msg.groupName,
+                    sender: msg.sender,
+                    content: msg.content,
+                });
+
+                io.to(msg.groupName).emit("group chat", msg);
+            } catch (err) {
+                console.log("Can't keep track of this message!", err);
+            }
+        });
+
+        socket.on("disconnect", () => {
+            console.log(username, "disconnected");
+
+            for (let [name, socketId] of Object.entries(userSocketMap)) {
+                if (socketId === socket.id) {
+                    delete userSocketMap[name];
+                    console.log(`Removed ${name} from userSocketMap`);
+                    break;
+                }
+            }
+            console.log("Updated userSocketMap:", userSocketMap);
+        });
     });
 </script>
