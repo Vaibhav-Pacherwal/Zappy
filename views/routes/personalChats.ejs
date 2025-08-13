@@ -622,8 +622,7 @@
             socket.emit("chat message", {
                 content: currentMessage,
                 sender: "<%= user1.fname %>",
-                reciever: "<%= user2.fname %>",
-                time: currTime
+                reciever: "<%= user2.fname %>"
             });
             input.value = "";
         }
@@ -633,7 +632,7 @@
         console.log(msg);
         let li = document.createElement("li");
         li.className = msg.sender === "<%= user1.fname %>" ? 'sent' : 'received';
-        li.innerHTML = `<strong>${msg.sender}</strong>${msg.content} (${msg.time})`;
+        li.innerHTML = `<strong>${msg.sender}</strong>${msg.content}`;
         messages.appendChild(li);
         messages.scrollTop = messages.scrollHeight;
     });
