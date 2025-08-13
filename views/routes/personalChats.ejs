@@ -608,7 +608,6 @@
                 content: currentMessage,
                 sender: "<%= user1.fname %>",
                 reciever: "<%= user2.fname %>",
-                time: currTime
             });
             input.value = "";
         }
@@ -618,7 +617,7 @@
         console.log(msg);
         let li = document.createElement("li");
         li.className = msg.sender === "<%= user1.fname %>" ? 'sent' : 'received';
-        li.innerHTML = `<strong>${msg.sender}</strong>${msg.content} (${msg.time})`;
+        li.innerHTML = `<strong>${msg.sender}</strong>${msg.content}`;
         messages.appendChild(li);
         messages.scrollTop = messages.scrollHeight;
     });
@@ -663,8 +662,6 @@
 
             isInitiator = true;
             socket.emit("call-user", { target: targetSocketId });
-            socket.emit("ready", { from: mySocketId });
-
             showNotification("📞 Starting call...", 'success');
         } catch (error) {
             console.error("❌ Error accessing media devices.", error);
@@ -688,6 +685,14 @@
             }
         };
 
+        pc.onconnectionstatechange = () => {
+            console.log("Connection state:", pc.connectionState);
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            console.log("ICE connection state:", pc.iceConnectionState);
+        };
+
         if (!remoteStream) remoteStream = new MediaStream();
 
         pc.ontrack = (event) => {
@@ -707,30 +712,11 @@
         return pc;
     }
 
-    socket.on("call-user", ({ target }) => {
+    socket.on("call-user", async ({ target }) => {
         console.log("📞 Received call-user from", target);
         targetSocketId = target;
         isInitiator = false;
-    });
-
-    socket.on("ready", async ({ from }) => {
-        console.log("✅ Received ready from", from);
-
-        if (isInitiator && peerConnection) {
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            socket.emit("offer", {
-                offer,
-                target: targetSocketId,
-                from: mySocketId
-            });
-        }
-    });
-
-    socket.on("offer", async ({ offer, from }) => {
-        console.log("📩 Received offer from", from);
-        targetSocketId = from;
-
+        
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
             document.getElementById("your-call").srcObject = stream;
@@ -745,48 +731,93 @@
                 peerConnection.addTrack(track, localStream);
             });
 
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-            remoteDescSet = true;
-            for (const candidate of pendingCandidates) {
-                try {
-                    await peerConnection.addIceCandidate(candidate);
-                } catch (err) {
-                    console.error("❌ Error adding queued ICE candidate:", err);
-                }
-            }
-            pendingCandidates = [];
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            socket.emit("answer", { answer, target: from });
+            socket.emit("ready", { from: mySocketId });
+            showNotification("📞 Incoming call...", 'success');
         } catch (error) {
-            console.error("❌ Error accessing media devices on receiving offer", error);
+            console.error("❌ Error accessing media devices on incoming call", error);
+            showNotification("❌ Could not access camera/microphone", 'error');
+        }
+    });
+
+    socket.on("ready", async ({ from }) => {
+        console.log("✅ Received ready from", from);
+
+        if (isInitiator && peerConnection) {
+            try {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                socket.emit("offer", {
+                    offer,
+                    target: targetSocketId,
+                    from: mySocketId
+                });
+            } catch (error) {
+                console.error("❌ Error creating offer:", error);
+            }
+        }
+    });
+
+    socket.on("offer", async ({ offer, from }) => {
+        console.log("📩 Received offer from", from);
+        targetSocketId = from;
+
+        if (peerConnection) {
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                remoteDescSet = true;
+                
+                // Process any pending ICE candidates
+                for (const candidate of pendingCandidates) {
+                    try {
+                        await peerConnection.addIceCandidate(candidate);
+                    } catch (err) {
+                        console.error("❌ Error adding queued ICE candidate:", err);
+                    }
+                }
+                pendingCandidates = [];
+                
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                socket.emit("answer", { answer, target: from });
+            } catch (error) {
+                console.error("❌ Error processing offer:", error);
+            }
         }
     });
 
     socket.on("answer", async ({ answer }) => {
         console.log("📩 Received answer");
         if (peerConnection) {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-            remoteDescSet = true;
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                remoteDescSet = true;
 
-            for (const candidate of pendingCandidates) {
-                try {
-                    await peerConnection.addIceCandidate(candidate);
-                } catch (err) {
-                    console.error("❌ Error adding queued ICE candidate:", err);
+                // Process any pending ICE candidates
+                for (const candidate of pendingCandidates) {
+                    try {
+                        await peerConnection.addIceCandidate(candidate);
+                    } catch (err) {
+                        console.error("❌ Error adding queued ICE candidate:", err);
+                    }
                 }
+                pendingCandidates = [];
+            } catch (error) {
+                console.error("❌ Error processing answer:", error);
             }
-            pendingCandidates = [];
         }
     });
 
     socket.on("candidate", async ({ candidate }) => {
-        if (peerConnection) {
-            const iceCandidate = new RTCIceCandidate(candidate);
-            if (remoteDescSet) {
-                await peerConnection.addIceCandidate(iceCandidate);
-            } else {
-                pendingCandidates.push(iceCandidate);
+        if (peerConnection && candidate) {
+            try {
+                const iceCandidate = new RTCIceCandidate(candidate);
+                if (remoteDescSet) {
+                    await peerConnection.addIceCandidate(iceCandidate);
+                } else {
+                    pendingCandidates.push(iceCandidate);
+                }
+            } catch (error) {
+                console.error("❌ Error processing ICE candidate:", error);
             }
         }
     });
@@ -802,11 +833,40 @@
         }, 3000);
     }
 
-    window.addEventListener("beforeunload", () => {
-        if (peerConnection) peerConnection.close();
+    function endCall() {
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
         }
+        if (remoteStream) {
+            remoteStream.getTracks().forEach(track => track.stop());
+            remoteStream = null;
+        }
+        document.getElementById("video-section").style.display = "none";
+        isInitiator = false;
+        remoteDescSet = false;
+        pendingCandidates = [];
+    }
+
+    const endCallBtn = document.getElementById("end-call");
+    if (endCallBtn) {
+        endCallBtn.addEventListener("click", () => {
+            endCall();
+            socket.emit("call-ended", { target: targetSocketId });
+        });
+    }
+
+    socket.on("call-ended", () => {
+        endCall();
+        showNotification("📞 Call ended", 'info');
+    });
+
+    window.addEventListener("beforeunload", () => {
+        endCall();
         socket.disconnect();
     });
 </script>
