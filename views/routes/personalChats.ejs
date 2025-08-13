@@ -559,11 +559,8 @@
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    const io = new Server(server, {
-        cors: {
-            origin: "*",
-            credentials: true
-        }
+    const socket = io("https://zappy-3.onrender.com", {
+        withCredentials: true
     });
 
     let userSocketMap = {};
