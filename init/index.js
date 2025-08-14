@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const User = require("../models/user");
-// const Message = require("../models/message");
-// const Group = require("../models/group");
-// const GroupMessage = require("../models/groupChats");
-// const Request = require("../models/join-request");
+const Message = require("../models/message");
+const Group = require("../models/group");
+const GroupMessage = require("../models/groupChats");
+const Request = require("../models/join-request");
 const initUserData = require("./userData");
 require("dotenv").config();
 
@@ -29,4 +29,4 @@ async function initDB() {
   await User.insertMany(initUserData.data);
 }
 
-main();
+main()
