@@ -333,7 +333,6 @@ body {
     }
 }
 
-/* Enhanced Bootstrap Alert Styles */
 .alert {
     position: fixed;
     top: 85px;
@@ -452,7 +451,6 @@ body {
     transition: opacity 0.15s linear;
 }
 
-/* Alert animations */
 @keyframes slideInDown {
     from {
         opacity: 0;
@@ -592,7 +590,6 @@ body {
     min-height: 0;
 }
 
-/* Enhanced scrollbar styles */
 .sidebar-content::-webkit-scrollbar,
 .recents-content::-webkit-scrollbar,
 .gnames::-webkit-scrollbar {
@@ -764,7 +761,6 @@ body {
     border-radius: 50%;
 }
 
-/* Empty states */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -791,7 +787,6 @@ body {
     line-height: 1.5;
 }
 
-/* Animations */
 @keyframes pulse {
 
     0%,
@@ -834,7 +829,6 @@ body {
     animation-delay: 0.3s;
 }
 
-/* Mobile/Responsive Design */
 @media (max-width: 1200px) {
     .containers {
         padding: 1.5rem;
