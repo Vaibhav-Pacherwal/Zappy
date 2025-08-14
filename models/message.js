@@ -18,20 +18,16 @@ async function main() {
 
 const messageSchema = new mongoose.Schema({
     sender: String,
-    reciever: String,
+    receiver: String,
     content: String,
-    date: {
-        type: String,
-        default: () => moment().format("DD MMM YYYY")
-    },
     sendAt: {
-        type: String,
-        default: () => moment().format("h:mm A")
+        type: Date,
+        default: Date.now
     },
     users: [
         {
-        type: String, 
-        required: true,
+            type: String,
+            required: true
         }
     ]
 });
