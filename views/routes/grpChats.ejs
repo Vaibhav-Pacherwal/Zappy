@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= grpDetails.groupName %> - Modern Chat</title>
+    <title>
+        <%= grpDetails.groupName %> - Modern Chat
+    </title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,34 +20,44 @@
     <div id="group-info-modal">
         <button class="close-btn" id="close-info">&times;</button>
         <div class="group-info-header">
-            <h2><%= grpDetails.groupName %></h2>
+            <h2>
+                <%= grpDetails.groupName %>
+            </h2>
         </div>
         <div class="group-details">
             <div class="detail-item">
                 <span class="detail-label">Admin:</span>
-                <span class="detail-value"><%= grpDetails.groupAdmin %></span>
+                <span class="detail-value">
+                    <%= grpDetails.groupAdmin %>
+                </span>
             </div>
             <div class="detail-item">
                 <span class="detail-label">Created:</span>
-                <span class="detail-value"><%= grpDetails.date %></span>
+                <span class="detail-value">
+                    <%= grpDetails.date %>
+                </span>
             </div>
             <div class="detail-item">
                 <span class="detail-label">Created At:</span>
-                <span class="detail-value"><%= grpDetails.createdAt %></span>
+                <span class="detail-value">
+                    <%= grpDetails.createdAt %>
+                </span>
             </div>
         </div>
         <div class="members-section">
             <h3>Members</h3>
-            <% otherMembers.forEach(member => { %>
+            <% otherMembers.forEach(member=> { %>
                 <div class="member-item">
                     <div class="member-name">
-                        <a href="/chat/private/<%= member %>"><%= member %></a>
+                        <a href="/chat/private/<%= member %>">
+                            <%= member %>
+                        </a>
                     </div>
                     <button class="delete-member" onclick="deleteUser('<%= grpDetails.groupName %>', '<%= member %>')">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
-            <% }) %>
+                <% }) %>
         </div>
     </div>
 
@@ -62,9 +74,13 @@
     <div class="chat-window">
         <div class="header">
             <div class="about-group">
-                <div class="group-avatar"><%= grpDetails.groupName.charAt(0).toUpperCase() %></div>
+                <div class="group-avatar">
+                    <%= grpDetails.groupName.charAt(0).toUpperCase() %>
+                </div>
                 <div class="group-info">
-                    <h1><%= grpDetails.groupName %></h1>
+                    <h1>
+                        <%= grpDetails.groupName %>
+                    </h1>
                     <div class="group-status">
                         <div class="status-dot"></div>
                         <span>Group chat • <%= otherMembers.length + 1 %> members</span>
@@ -83,19 +99,21 @@
 
         <div class="chattings">
             <ul id="messages">
-                <% sortedChats.forEach(day => { %>
+                <% sortedChats.forEach(day=> { %>
                     <p class="date">
                         <%= day[0].date %>
                     </p>
-                    <% day.forEach(msg => { %>
+                    <% day.forEach(msg=> { %>
                         <li class="message <%= msg.sender === userDetails.username ? 'sent' : 'received' %>">
-                            <% if (msg.sender !== userDetails.username) { %>
-                                <strong><%= msg.sender %></strong>
-                            <% } %>
-                            <%= msg.content %>
+                            <% if (msg.sender !==userDetails.username) { %>
+                                <strong>
+                                    <%= msg.sender %>
+                                </strong>
+                                <% } %>
+                                    <%= msg.content %>
                         </li>
-                    <% }) %>
-                <% }) %>
+                        <% }) %>
+                            <% }) %>
             </ul>
         </div>
 
@@ -139,6 +157,7 @@
 
         yesBtn.addEventListener("click", () => {
             console.log("Leaving group...");
+            window.location.href = "/groups";
         });
 
         detailBox.addEventListener("click", (e) => {
@@ -152,8 +171,6 @@
                 confirmationBox.classList.remove("show-modal");
             }
         });
-
-
 
         function deleteUser(grpName, nominee) {
             fetch(`/${grpName}/remove/${nominee}`, {
@@ -218,13 +235,13 @@
         socket.on("group chat", (msg) => {
             let li = document.createElement("li");
             li.className = msg.sender === currentUser ? 'sent' : 'received';
-            
+
             if (msg.sender === currentUser) {
                 li.innerHTML = `${msg.content}`;
             } else {
                 li.innerHTML = `<strong>${msg.sender}</strong> ${msg.content}`;
             }
-            
+
             messages.appendChild(li);
             messages.scrollTop = messages.scrollHeight;
         });
