@@ -173,22 +173,10 @@
             }
         });
 
-        async function deleteUser(grpName, nominee) {
-            await fetch(`/${grpName}/remove/${nominee}`, {
+        function deleteUser(grpName, nominee) {
+            fetch(`/${grpName}/remove/${nominee}`, {
                 method: "DELETE"
             })
-                .then(res => {
-                    if (res.ok) {
-                        showNotification("Member removed successfully", "success");
-                        location.reload();
-                    } else {
-                        showNotification("Only admin can remove members", "error");
-                    }
-                })
-                .catch((err) => {
-                    showNotification("Error removing member", "error");
-                    console.log("Error:", err);
-                });
         }
 
         function showNotification(message, type = 'success') {
