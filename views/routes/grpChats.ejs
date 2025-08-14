@@ -158,7 +158,7 @@
 
         yesBtn.addEventListener("click", () => {
             console.log("Leaving group...");
-            window.location.href = "/groups";
+            window.location.href = "/exit/<%= grpDetails._id %>/";
         });
 
         detailBox.addEventListener("click", (e) => {

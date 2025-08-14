@@ -524,6 +524,7 @@ app.get("/exit/:grpId/", protect, async (req, res) => {
             res.render("routes/newAdmin.ejs", { grpDetails, otherMembers });
         }
         await Group.findByIdAndUpdate({ _id: grpId }, { $pull: { members: username } });
+        req.flash(`You are no longer member of ${grpDetails.groupName}`)
         res.redirect("/chats");
     } catch (err) {
         res.send("unable to left this group, try again later!");
