@@ -444,10 +444,7 @@ app.get("/requests", protect, async (req, res) => {
     const username = req.user.username;
     try {
         let requests = await Request.find({ admin: username });
-        if (requests.length === 0) {
-            return res.send("when someone wants to join any of your groups, his/her request appears here!");
-        }
-        return res.render("routes/requestApprovals.ejs", { requests });
+        res.render("routes/requestApprovals.ejs", { requests });
     } catch (err) {
         console.log("failing to gather info!");
     }

@@ -4,22 +4,36 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Zappy | Requests</title>
+        <link rel="stylesheet" href="/css/requests.css">
     </head>
     <body>
-        <h1>Requests</h1>
-        <% requests.forEach(request => { %>
-            <p style="font-size: 1.2rem;">
-                <%= request.user %> wants to join <%= request.groupName %>
-                <div class="btns" style="display: flex; gap: 5px;">
-                    <form action="/request/approve/<%= request._id %>?_method=PATCH" method="post">
-                        <button>Approve</button>
-                    </form>
-                    <form action="/request/disapprove/<%= request._id %>?_method=DELETE" method="post">
-                        <button>Disapprove</button>
-                    </form>
+        <div class="requests-container">
+            <div class="header">
+                <h1 class="title">Group Join Requests</h1>
+            </div>
+            
+            <% if(requests.length === 0) { %>
+                <div class="no-requests">
+                    <p>When someone wants to join any of your groups, their request will appear here!</p>
                 </div>
-            </p>
-            <hr>
-        <% }) %>
+            <% } else { %>
+                <% requests.forEach(request => { %>
+                    <div class="request-item">
+                        <div class="request-text">
+                            <span class="user-name"><%= request.user %></span> wants to join 
+                            <span class="group-name"><%= request.groupName %></span>
+                        </div>
+                        <div class="btns">
+                            <form action="/request/approve/<%= request._id %>?_method=PATCH" method="post">
+                                <button class="btn btn-approve">Approve</button>
+                            </form>
+                            <form action="/request/disapprove/<%= request._id %>?_method=DELETE" method="post">
+                                <button class="btn btn-disapprove">Disapprove</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
     </body>
 </html>

@@ -1,0 +1,217 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #f7f7f8;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f0f0f2;
+    --border-light: #e5e5e7;
+    --border-medium: #d1d1d6;
+    --text-primary: #2b2d31;
+    --text-secondary: #5c5f66;
+    --text-tertiary: #8e9297;
+    --accent-primary: #d97706;
+    --accent-hover: #b45309;
+    --accent-light: #fed7aa;
+    --accent-bg: #fff7ed;
+    --warning: #f59e0b;
+    --warning-bg: #fffbeb;
+    --error: #ef4444;
+    --error-bg: #fef2f2;
+    --success: #10b981;
+    --success-hover: #059669;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #eef2f3 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.requests-container {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-hover));
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.no-requests {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-2xl);
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.no-requests p {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    line-height: 1.6;
+}
+
+.request-item {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--accent-primary);
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.request-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.request-text {
+    font-size: 1.125rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--accent-primary);
+}
+
+.group-name {
+    font-weight: 600;
+    color: var(--success);
+}
+
+.btns {
+    display: flex;
+    gap: 1rem;
+}
+
+.btns form {
+    margin: 0;
+}
+
+.btn {
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-approve {
+    background: linear-gradient(135deg, var(--success), var(--success-hover));
+    color: white;
+}
+
+.btn-approve:hover {
+    background: linear-gradient(135deg, var(--success-hover), #047857);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn-disapprove {
+    background: linear-gradient(135deg, var(--error), #dc2626);
+    color: white;
+}
+
+.btn-disapprove:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 1rem;
+    }
+
+    .header {
+        padding: 1.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .request-item {
+        padding: 1.5rem;
+    }
+
+    .btns {
+        flex-direction: column;
+    }
+
+    .btn {
+        justify-content: center;
+    }
+}
