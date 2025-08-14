@@ -5,11 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zappy | Login</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    if (alert && alert.parentElement) {
+                        alert.style.opacity = '0';
+                        alert.style.transform = 'translateX(-50%) translateY(-20px)';
+                        setTimeout(() => {
+                            if (alert && alert.parentElement) {
+                                alert.remove();
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            });
+        });
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/login.css">
 </head>
 
 <body>  
+    <%- include('../partials/flash.ejs') %>
     <div class="container">
         <div class="logo">
             <h1>Zappy</h1>

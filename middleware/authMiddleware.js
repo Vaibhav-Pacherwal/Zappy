@@ -7,7 +7,8 @@ const protect = async (req, res, next) => {
         const token = req.cookies.token;
 
         if (!token) {
-            return res.status(401).json({ message: "Not authorized, no token" });
+            req.flash("error", "You must be logged in!");
+            return res.redirect("/login-form");
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
