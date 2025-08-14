@@ -573,5 +573,11 @@ app.delete("/:grpName/remove/:nominee", protect, async (req, res) => {
     }
 });
 
+app.get("/logout", (req, res) => {
+    res.clearCookie("token");
+    req.flash("success", "You have been logged out!");
+    res.redirect("/");
+});
+
 
 

@@ -56,7 +56,7 @@
                 <div class="icon">🔔</div>
                 <span class="text">Join Requests</span>
             </a>
-            <a href="/">
+            <a href="/logout">
                 <div class="icon">🚪</div>
                 <span class="text">Log Out</span>
             </a>
@@ -65,184 +65,177 @@
 
     <%- include('../partials/flash.ejs') %>
 
-    <div class="containers">
-        <div class="recents">
-            <h1>Recent Chats</h1>
-            <% if (recieversUsername.length===0) { %>
-                <div class="empty-state">
-                    <div class="empty-icon">💬</div>
-                    <div class="empty-text">No recent conversations</div>
-                </div>
-                <% } else { %>
-                    <div class="recents-content">
-                        <% for(let i=0; i < recieversUsername.length; i++) { %>
-                            <a href="/chats/recents/<%= recieversUsername[i] %>" class="users">
-                                <div class="user-icon">
-                                    <%= recieversUsername[i].charAt(0).toUpperCase() %>
-                                </div>
-                                <div>
-                                    <%= recieversUsername[i] %>
-                                </div>
-                            </a>
-                            <% } %>
+        <div class="containers">
+            <div class="recents">
+                <h1>Recent Chats</h1>
+                <% if (recieversUsername.length===0) { %>
+                    <div class="empty-state">
+                        <div class="empty-icon">💬</div>
+                        <div class="empty-text">No recent conversations</div>
                     </div>
-                    <% } %>
-        </div>
-
-        <div class="groups">
-            <div>
-                <h1>Groups</h1>
-                <div class="gnames">
-                    <% if (groups.length===0) { %>
-                        <div class="empty-state">
-                            <div class="empty-icon">👥</div>
-                            <div class="empty-text">No groups yet. Create your first group!</div>
-                        </div>
-                        <% } else { %>
-                            <% for(let i=0; i < groups.length; i++) { %>
-                                <a href="/chats/group/<%= groups[i].groupName %>" class="users">
-                                    <div class="user-icon">👥</div>
+                    <% } else { %>
+                        <div class="recents-content">
+                            <% for(let i=0; i < recieversUsername.length; i++) { %>
+                                <a href="/chats/recents/<%= recieversUsername[i] %>" class="users">
+                                    <div class="user-icon">
+                                        <%= recieversUsername[i].charAt(0).toUpperCase() %>
+                                    </div>
                                     <div>
-                                        <%= groups[i].groupName %>
+                                        <%= recieversUsername[i] %>
                                     </div>
                                 </a>
                                 <% } %>
-                                    <% } %>
-                </div>
+                        </div>
+                        <% } %>
             </div>
-            <button id="group-creation">
-                <span class="btn-icon">➕</span>
-                Create Group
-            </button>
-        </div>
 
-        <div class="sidebar">
-            <h1>Start Chat With...</h1>
-            <% if (otherUsers.length===0) { %>
-                <div class="empty-state">
-                    <div class="empty-icon">👥</div>
-                    <div class="empty-text">No users available to chat with</div>
-                </div>
-                <% } else { %>
-                    <div class="sidebar-content">
-                        <% for(let i=0; i < otherUsers.length; i++) { %>
-                            <a href="/chats/<%= otherUsers[i]._id %>" class="users">
-                                <div class="user-icon">
-                                    <%= otherUsers[i].fname.charAt(0) %>
-                                        <%= otherUsers[i].lname.charAt(0) %>
-                                </div>
-                                <div>
-                                    <%= otherUsers[i].fname %>
-                                        <%= otherUsers[i].lname %>
-                                </div>
-                            </a>
-                            <% } %>
+            <div class="groups">
+                <div>
+                    <h1>Groups</h1>
+                    <div class="gnames">
+                        <% if (groups.length===0) { %>
+                            <div class="empty-state">
+                                <div class="empty-icon">👥</div>
+                                <div class="empty-text">No groups yet. Create your first group!</div>
+                            </div>
+                            <% } else { %>
+                                <% for(let i=0; i < groups.length; i++) { %>
+                                    <a href="/chats/group/<%= groups[i].groupName %>" class="users">
+                                        <div class="user-icon">👥</div>
+                                        <div>
+                                            <%= groups[i].groupName %>
+                                        </div>
+                                    </a>
+                                    <% } %>
+                                        <% } %>
                     </div>
-                    <% } %>
+                </div>
+                <button id="group-creation">
+                    <span class="btn-icon">➕</span>
+                    Create Group
+                </button>
+            </div>
+
+            <div class="sidebar">
+                <h1>Start Chat With...</h1>
+                <% if (otherUsers.length===0) { %>
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <div class="empty-text">No users available to chat with</div>
+                    </div>
+                    <% } else { %>
+                        <div class="sidebar-content">
+                            <% for(let i=0; i < otherUsers.length; i++) { %>
+                                <a href="/chats/<%= otherUsers[i]._id %>" class="users">
+                                    <div class="user-icon">
+                                        <%= otherUsers[i].fname.charAt(0) %>
+                                            <%= otherUsers[i].lname.charAt(0) %>
+                                    </div>
+                                    <div>
+                                        <%= otherUsers[i].fname %>
+                                            <%= otherUsers[i].lname %>
+                                    </div>
+                                </a>
+                                <% } %>
+                        </div>
+                        <% } %>
+            </div>
         </div>
-    </div>
 
-    <script>
-        // Enhanced navbar functionality
-        const navbar = document.getElementById('navbar');
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const requestsMenu = document.getElementById('requestsMenu');
+        <script>
+            const navbar = document.getElementById('navbar');
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const requestsMenu = document.getElementById('requestsMenu');
 
-        let lastScrollY = window.scrollY;
-        let ticking = false;
+            let lastScrollY = window.scrollY;
+            let ticking = false;
 
-        function updateNavbar() {
-            const currentScrollY = window.scrollY;
-            
-            if (currentScrollY > 80 && currentScrollY > lastScrollY) {
-                if (!navbar.classList.contains('collapsed')) {
-                    navbar.classList.add('collapsed');
+            function updateNavbar() {
+                const currentScrollY = window.scrollY;
+
+                if (currentScrollY > 80 && currentScrollY > lastScrollY) {
+                    if (!navbar.classList.contains('collapsed')) {
+                        navbar.classList.add('collapsed');
+                    }
+                } else if (currentScrollY < lastScrollY && currentScrollY < 50) {
+                    if (navbar.classList.contains('collapsed')) {
+                        navbar.classList.remove('collapsed');
+                    }
                 }
-            } else if (currentScrollY < lastScrollY && currentScrollY < 50) {
-                if (navbar.classList.contains('collapsed')) {
-                    navbar.classList.remove('collapsed');
+
+                lastScrollY = currentScrollY;
+                ticking = false;
+            }
+
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateNavbar);
+                    ticking = true;
                 }
             }
-            
-            lastScrollY = currentScrollY;
-            ticking = false;
-        }
 
-        function requestTick() {
-            if (!ticking) {
-                requestAnimationFrame(updateNavbar);
-                ticking = true;
-            }
-        }
+            window.addEventListener('scroll', requestTick);
 
-        window.addEventListener('scroll', requestTick);
+            mobileMenuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                requestsMenu.classList.toggle('show');
 
-        // Mobile menu functionality
-        mobileMenuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            requestsMenu.classList.toggle('show');
-            
-            // Animate hamburger icon
-            if (requestsMenu.classList.contains('show')) {
-                mobileMenuToggle.innerHTML = '✕';
-                mobileMenuToggle.style.transform = 'rotate(180deg)';
-            } else {
-                mobileMenuToggle.innerHTML = '☰';
-                mobileMenuToggle.style.transform = 'rotate(0deg)';
-            }
-        });
+                if (requestsMenu.classList.contains('show')) {
+                    mobileMenuToggle.innerHTML = '✕';
+                    mobileMenuToggle.style.transform = 'rotate(180deg)';
+                } else {
+                    mobileMenuToggle.innerHTML = '☰';
+                    mobileMenuToggle.style.transform = 'rotate(0deg)';
+                }
+            });
 
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!requestsMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-                requestsMenu.classList.remove('show');
-                mobileMenuToggle.innerHTML = '☰';
-                mobileMenuToggle.style.transform = 'rotate(0deg)';
-            }
-        });
+            document.addEventListener('click', (e) => {
+                if (!requestsMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                    requestsMenu.classList.remove('show');
+                    mobileMenuToggle.innerHTML = '☰';
+                    mobileMenuToggle.style.transform = 'rotate(0deg)';
+                }
+            });
 
-        // Group creation functionality
-        const createGroup = document.getElementById("group-creation");
-        createGroup.addEventListener("click", () => {
-            createGroup.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                createGroup.style.transform = '';
-                window.location.href = "/create-group";
-            }, 150);
-        });
-
-        // Enhanced user item animations
-        const userItems = document.querySelectorAll('.users');
-        userItems.forEach((item, index) => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                item.style.transition = 'all 0.3s ease';
-                item.style.opacity = '1';
-                item.style.transform = 'translateY(0)';
-            }, index * 50 + 200);
-
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                item.style.transform = 'translateX(6px) scale(0.98)';
+            const createGroup = document.getElementById("group-creation");
+            createGroup.addEventListener("click", () => {
+                createGroup.style.transform = 'scale(0.95)';
                 setTimeout(() => {
-                    window.location.href = item.getAttribute('href');
+                    createGroup.style.transform = '';
+                    window.location.href = "/create-group";
                 }, 150);
             });
-        });
 
-        // Enhanced panel interactions
-        const panels = document.querySelectorAll('.sidebar, .recents, .groups');
-        panels.forEach(panel => {
-            panel.addEventListener('mouseenter', () => {
-                panel.style.borderColor = 'var(--border-medium)';
+            const userItems = document.querySelectorAll('.users');
+            userItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 50 + 200);
+
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    item.style.transform = 'translateX(6px) scale(0.98)';
+                    setTimeout(() => {
+                        window.location.href = item.getAttribute('href');
+                    }, 150);
+                });
             });
 
-            panel.addEventListener('mouseleave', () => {
-                panel.style.borderColor = 'var(--border-light)';
+            const panels = document.querySelectorAll('.sidebar, .recents, .groups');
+            panels.forEach(panel => {
+                panel.addEventListener('mouseenter', () => {
+                    panel.style.borderColor = 'var(--border-medium)';
+                });
+
+                panel.addEventListener('mouseleave', () => {
+                    panel.style.borderColor = 'var(--border-light)';
+                });
             });
-        });
-    </script>
+        </script>
 </body>
 
 </html>
