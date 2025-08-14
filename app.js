@@ -433,7 +433,7 @@ app.get("/:grpName/join-request", protect, async (req, res) => {
             admin: grpAdmin,
             groupName: grpName
         });
-        req.flash("success", `Join request sent to ${grpAdmin}`);
+        req.flash("success", `Join request sent to @${grpAdmin}`);
         res.redirect("/chats");
     } catch (err) {
         res.send("can't sent request to admin!");
