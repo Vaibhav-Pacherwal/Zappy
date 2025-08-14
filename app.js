@@ -256,7 +256,7 @@ app.post("/login", async (req, res) => {
                 maxAge: 30 * 24 * 60 * 60 * 1000
             });
 
-            req.flash("success", "Welcome to Zappy by vaibhav!");
+            req.flash("success", "Welcome to Zappy!");
             return res.redirect("/chats");
         } else {
             return res.status(401).json({ message: "Invalid Username or Password" });
@@ -433,7 +433,8 @@ app.get("/:grpName/join-request", protect, async (req, res) => {
             admin: grpAdmin,
             groupName: grpName
         });
-        res.render("routes/sentRequest.ejs", { grpDetails });
+        req.flash("success", `Join request sent to ${grpAdmin}`);
+        res.redirect("/chats");
     } catch (err) {
         res.send("can't sent request to admin!");
     }
