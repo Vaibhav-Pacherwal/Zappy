@@ -563,7 +563,8 @@ app.delete("/:grpName/remove/:nominee", protect, async (req, res) => {
         const grpDetails = await Group.findOne({ groupName: grpName });
         const grpAdmin = grpDetails.groupAdmin;
         if (grpAdmin !== user) {
-            res.status(400).send("You are not an admin to this group, only admin can remove someone!");
+            req.flash("error", "Only admin can remove any user!");
+            res.redirect(`/group/${grpDetails._id}`);
         } else {
             await Group.updateOne({ groupName: grpName }, { $pull: { members: nominee } });
             res.redirect(`/group/${grpDetails._id}`);

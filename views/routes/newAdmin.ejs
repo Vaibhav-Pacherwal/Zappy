@@ -3,61 +3,151 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Zappy | Change Admin</title>
-        <style>
-            .newAdmin {
-                padding: 1rem;
-                width: 250px;
-                border: 2px solid black;
-                border-radius: 12px;
-                background-color: #f8f8fd;
-                display: flex;
-                flex-direction: column;
-                overflow-y: auto;
-            }
-            .newForm {
-                display: none;
-            }
-            .show {
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-            }
-            .newForm button {
-                width: 150px;
-                padding: 0.5rem;
-                background-color: black;
-                color: white;
-                font-size: 1rem;
-                border: none;
-                border-radius: 10px;
-                cursor: pointer;
-            }
-            .newAdmin::-webkit-scrollbar {
-                display: none;
-            }
-        </style>
+        <title>Change Admin | Zappy Chat</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     </head>
+    <link rel="stylesheet" href="/css/newAdmin.css">
     <body>
-        <p>
-            You are an admin of this group <br>
-            <a href="#" id="selectAdmin">click here</a> to choose somebody else as an admin.
-        </p>
-        <form action="/change-admin/<%= grpDetails._id %>" method="post" class="newForm">
-            <div class="newAdmin">
-                <% otherMembers.forEach(member => { %>
-                    <label for="user"><input type="radio" name="user" value="<%= member %>"><%= member %></label><br>
-                <% }) %>
+        <div class="admin-change-container">
+            <div class="header">
+                <div class="admin-icon">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <h1 class="title">Admin Transfer</h1>
+                <p class="subtitle">
+                    You are currently the admin of this group. Transfer your admin privileges to another member.
+                </p>
             </div>
-            <button>Change & Leave</button>
-        </form>
+
+            <div class="warning-notice">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <div class="warning-text">
+                    <strong>Important:</strong> Once you transfer admin privileges, you will automatically leave this group and won't be able to access it unless the new admin adds you back.
+                </div>
+            </div>
+
+            <button class="select-admin-btn" id="selectAdmin">
+                <i class="fa-solid fa-user-check"></i>
+                Choose New Admin
+            </button>
+
+            <form action="/change-admin/<%= grpDetails._id %>" method="post" class="admin-form" id="adminForm">
+                <h2 class="form-title">
+                    <i class="fa-solid fa-users"></i>
+                    Select New Administrator
+                </h2>
+                
+                <div class="members-container">
+                    <% otherMembers.forEach(member => { %>
+                        <label class="member-option" for="user_<%= member %>">
+                            <input type="radio" name="user" value="<%= member %>" id="user_<%= member %>">
+                            <div class="member-avatar">
+                                <%= member.charAt(0).toUpperCase() %>
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name"><%= member %></div>
+                                <div class="member-role">Group Member</div>
+                            </div>
+                        </label>
+                    <% }) %>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancelBtn">
+                        <i class="fa-solid fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger" id="submitBtn" disabled>
+                        <i class="fa-solid fa-crown"></i>
+                        Transfer Admin & Leave
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            const selectAdminBtn = document.getElementById("selectAdmin");
+            const adminForm = document.getElementById("adminForm");
+            const cancelBtn = document.getElementById("cancelBtn");
+            const submitBtn = document.getElementById("submitBtn");
+            const radioButtons = document.querySelectorAll('input[type="radio"]');
+            const memberOptions = document.querySelectorAll('.member-option');
+
+            selectAdminBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                adminForm.classList.add("show");
+                selectAdminBtn.style.display = "none";
+            });
+
+            cancelBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                adminForm.classList.remove("show");
+                selectAdminBtn.style.display = "flex";
+                
+                radioButtons.forEach(radio => {
+                    radio.checked = false;
+                });
+                memberOptions.forEach(option => {
+                    option.classList.remove('selected');
+                });
+                submitBtn.disabled = true;
+            });
+
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    memberOptions.forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    
+                    this.closest('.member-option').classList.add('selected');
+
+                    submitBtn.disabled = false;
+                });
+            });
+
+            memberOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change'));
+                });
+            });
+
+            adminForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const selectedMember = document.querySelector('input[name="user"]:checked');
+                if (!selectedMember) {
+                    alert('Please select a new admin first.');
+                    return;
+                }
+
+                const confirmed = confirm(
+                    `Are you sure you want to make "${selectedMember.value}" the new admin? ` +
+                    `You will be removed from this group immediately and cannot access it unless the new admin adds you back.`
+                );
+
+                if (confirmed) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    this.submit();
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.querySelector('.admin-change-container');
+                container.style.opacity = '0';
+                container.style.transform = 'translateY(30px) scale(0.95)';
+                
+                setTimeout(() => {
+                    container.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0) scale(1)';
+                }, 100);
+            });
+        </script>
     </body>
-    <script>
-        const options = document.getElementById("selectAdmin");
-        const members = document.querySelector(".newForm");
-        options.addEventListener("click", (e)=>{
-            e.preventDefault();
-            members.classList.add("show");
-        })
-    </script>
 </html>
