@@ -259,7 +259,8 @@ app.post("/login", async (req, res) => {
             req.flash("success", "Welcome to Zappy!");
             return res.redirect("/chats");
         } else {
-            return res.status(401).json({ message: "Invalid Username or Password" });
+            req.flash("error", "invalid username or password");
+            res.redirect("/login-form");
         }
     } catch (err) {
         console.log("can't perform operations right now!");
