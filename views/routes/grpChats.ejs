@@ -173,8 +173,8 @@
             }
         });
 
-        function deleteUser(grpName, nominee) {
-            fetch(`/${grpName}/remove/${nominee}`, {
+        async function deleteUser(grpName, nominee) {
+            await fetch(`/${grpName}/remove/${nominee}`, {
                 method: "DELETE"
             })
                 .then(res => {
