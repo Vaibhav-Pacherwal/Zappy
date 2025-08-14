@@ -3,12 +3,72 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Attempting Illegal Access❗</title>
+        <title>Access Restricted | Zappy Chat</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     </head>
+    <link rel="stylesheet" href="/css/illegalMember.css">
     <body>
-        <p>
-            You are not an active member to this group❗<br>
-            <a href="/<%= grpDetails.groupName %>/join-request">click here</a> to send membership request to admin.
-        </p>
+        <div class="access-denied-container">
+            <div class="error-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            
+            <h1 class="error-title">Access Restricted</h1>
+            
+            <p class="error-message">
+                You are not an active member of this group and cannot access its chat.
+            </p>
+            
+            <div class="group-info">
+                <div class="group-avatar">
+                    <%= grpDetails.groupName.charAt(0).toUpperCase() %>
+                </div>
+                <div class="group-details">
+                    <h3><%= grpDetails.groupName %></h3>
+                    <p>Private Group • Members only</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/<%= grpDetails.groupName %>/join-request" class="btn btn-primary" id="joinRequestBtn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Request to Join Group
+                </a>
+                
+                <a href="/chats" class="btn btn-outline">
+                    <i class="fa-solid fa-home"></i>
+                    Go Back Home
+                </a>
+            </div>
+            
+            <div class="help-text">
+                <p>
+                    Need help? <a href="/support">Contact Support</a> or check our 
+                    <a href="/help">Help Center</a> for more information.
+                </p>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('joinRequestBtn').addEventListener('click', function(e) {
+                this.classList.add('loading');
+                this.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Sending Request...';
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.querySelector('.access-denied-container');
+                container.style.opacity = '0';
+                container.style.transform = 'translateY(30px) scale(0.95)';
+                
+                setTimeout(() => {
+                    container.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0) scale(1)';
+                }, 100);
+            });
+        </script>
     </body>
 </html>
