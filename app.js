@@ -350,13 +350,13 @@ app.get("/chats/:id", protect, async (req, res) => {
         let sortedChats = [];
         let msgDates = new Set();
         chats.forEach(chat => {
-            msgDates.add(chat.date);
+            msgDates.add(chat.sendAt.toISOString().split('T')[0]);
         });
         let dates = Array.from(msgDates);
         dates.forEach(date => {
             let subData = [];
             chats.forEach(chat => {
-                if (chat.date === date) {
+                if (chat.sendAt.toISOString().split('T')[0] === date) {
                     subData.push(chat);
                 }
             });

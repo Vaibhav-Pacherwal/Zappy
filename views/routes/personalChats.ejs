@@ -73,7 +73,7 @@
             <ul id="messages">
                 <% sortedChats.forEach((subChat) => { %>
                     <p>
-                        <%= subChat[0].date %>
+                        <%= subChat[0].sendAt.toISOString().split('T')[0] %>
                     </p>
                     <% subChat.forEach((chat)=>{ %>
                         <li class="<%= chat.sender === user1.fname ? 'sent' : 'received' %>">
