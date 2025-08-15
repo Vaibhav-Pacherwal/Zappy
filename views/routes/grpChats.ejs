@@ -101,7 +101,7 @@
             <ul id="messages">
                 <% sortedChats.forEach(day=> { %>
                     <p class="date">
-                        <%= day[0].date %>
+                        <%= day[0].date.toISOString().split('T')[0] %>
                     </p>
                     <% day.forEach(msg=> { %>
                         <li class="message <%= msg.sender === userDetails.username ? 'sent' : 'received' %>">
