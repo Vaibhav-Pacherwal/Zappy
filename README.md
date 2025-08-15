@@ -31,25 +31,25 @@ It features **JWT authentication**, **email verification via Brevo**, and **WebR
 ## 📸 Screenshots
 
 ### 🏠 Home Page
-![Home Page](/images/zappy_home.png)
+![Home Page](public/images/zappy_home.png)
 
 ### 🔑 Login with OTP Verification
-![Login Page](/images/zappy_login.png)
+![Login Page](public/images/zappy_login.png)
 
 ### 📊 Dashboard
-![Dashboard](/images/zappy_dashboard.png)
+![Dashboard](public/images/zappy_dashboard.png)
 
 ### 💬 Private Chat
-![Private Chat](/images/zappy_chat_1-1.png)
+![Private Chat](public/images/zappy_chat_1-1.png)
 
 ### 👥 Group Chat
-![Group Chat](/images/zapp_group_chat.png)
+![Group Chat](public/images/zapp_group_chat.png)
 
 ### 📩 Access Request
-![Access Request](/images/zappy_access_request.png)
+![Access Request](public/images/zappy_access_request.png)
 
 ### ✅ Request Approval
-![Request Approval](/images/zappy_request_approval.png)
+![Request Approval](public/images/zappy_request_approval.png)
 
 ---
 
