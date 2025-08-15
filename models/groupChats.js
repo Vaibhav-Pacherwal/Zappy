@@ -21,12 +21,8 @@ const grpChatSchema = new mongoose.Schema({
     sender: String,
     content: String,
     date: {
-        type: String,
-        default: moment().format("DD MMM YYYY")
-    },
-    time: {
-        type: String,
-        default: moment().format("h:mm A")
+        type: Date,
+        default: Date.now
     }
 });
 

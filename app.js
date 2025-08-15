@@ -494,14 +494,14 @@ app.get("/group/:grpId", protect, async (req, res) => {
         let otherMembers = members.filter(member => member !== userDetails.username);
         const uniqueDates = new Set();
         grpChats.forEach(message => {
-            uniqueDates.add(message.date);
+            uniqueDates.add(message.date.toISOString().split('T')[0]);
         });
         const uD = Array.from(uniqueDates);
         let sortedChats = [];
         uD.forEach(date => {
             let subArr = [];
             grpChats.forEach(chat => {
-                if (chat.date === date) {
+                if (chat.date.toISOString().split('T')[0] === date) {
                     subArr.push(chat);
                 }
             });
