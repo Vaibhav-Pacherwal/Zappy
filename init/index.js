@@ -5,7 +5,7 @@ require("dotenv").config();
 
 async function main() {
   try {
-    await mongoose.connect("mongodb+srv://vaibhavpacherwal57:mongoatlas@cluster0.qrpazoy.mongodb.net/zappy?retryWrites=true&w=majority", {
+    await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
