@@ -1,15 +1,11 @@
 const mongoose = require("mongoose");
 const User = require("../models/user");
-const Message = require("../models/message");
-const Group = require("../models/group");
-const GroupMessage = require("../models/groupChats");
-const Request = require("../models/join-request");
 const initUserData = require("./userData");
 require("dotenv").config();
 
 async function main() {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
+    await mongoose.connect("mongodb+srv://vaibhavpacherwal57:mongoatlas@cluster0.qrpazoy.mongodb.net/zappy?retryWrites=true&w=majority", {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
