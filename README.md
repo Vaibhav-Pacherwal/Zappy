@@ -34,22 +34,22 @@ It features **JWT authentication**, **email verification via Brevo**, and **WebR
 ![Home Page](public/images/zappy_home.png)
 
 ### 🔑 Login with OTP Verification
-![Login Page](public/images/zappy_login.png)
+![Login Page](https://github.com/Vaibhav-Pacherwal/Zappy/blob/main/public/images/zappy_login.png)
 
 ### 📊 Dashboard
-![Dashboard](public/images/zappy_dashboard.png)
+![Dashboard](https://github.com/Vaibhav-Pacherwal/Zappy/blob/main/public/images/zappy_dashboard.png)
 
 ### 💬 Private Chat
-![Private Chat](public/images/zappy_chat_1-1.png)
+![Private Chat](https://github.com/Vaibhav-Pacherwal/Zappy/blob/main/public/images/zappy_chat_1-1.png)
 
 ### 👥 Group Chat
-![Group Chat](public/images/zapp_group_chat.png)
+![Group Chat](https://github.com/Vaibhav-Pacherwal/Zappy/blob/main/public/images/zapp_group_chat.png)
 
 ### 📩 Access Request
-![Access Request](public/images/zappy_access_request.png)
+![Access Request](https://github.com/Vaibhav-Pacherwal/Zappy/blob/main/public/images/zappy_access_request.png)
 
 ### ✅ Request Approval
-![Request Approval](public/images/zappy_request_approval.png)
+![Request Approval](https://github.com/Vaibhav-Pacherwal/Zappy/blob/main/public/images/zappy_request_approval.png)
 
 ---
 
